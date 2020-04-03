@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ReadCommentFragment">
+    <!--评论背景-->
+    <ImageView
+        android:id="@+id/readcmback"
+        android:layout_width="325dp"
+        android:layout_height="493dp"
+        android:src="@drawable/readbgnote"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.441"/>
+
+    <!--赞-->
+    <ImageView
+        android:id="@+id/readcmzan"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/readzan"
+        app:layout_constraintBottom_toBottomOf="@+id/readcmback"
+        app:layout_constraintEnd_toEndOf="@+id/readcmback"
+        app:layout_constraintHorizontal_bias="0.53"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback"
+        app:layout_constraintVertical_bias="0.584" />
+
+    <!--踩-->
+    <ImageView
+        android:id="@+id/readcmzancopy"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/readzancopy"
+        app:layout_constraintBottom_toBottomOf="@+id/readcmback"
+        app:layout_constraintEnd_toEndOf="@+id/readcmback"
+        app:layout_constraintHorizontal_bias="0.80"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback"
+        app:layout_constraintVertical_bias="0.584" />
+
+    <!--评论时间-->
+    <TextView
+        android:id="@+id/readcmtime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="120dp"
+        android:text="时间：yyyy:mm:dd"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback" />
+
+    <!--评论用户名-->
+    <TextView
+        android:id="@+id/readcmuser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="150dp"
+        android:text="XXX:"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback" />
+
+    <!--评论区主标题-->
+    <TextView
+        android:id="@+id/readcomtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="80dp"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:text="评论区:"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback" />
+
+    <!--点赞数量-->
+    <TextView
+        android:id="@+id/readcmzannum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="200dp"
+        android:text="XX"
+        app:layout_constraintBottom_toBottomOf="@+id/readcmback"
+        app:layout_constraintEnd_toStartOf="@+id/readcmzancopy"
+        app:layout_constraintHorizontal_bias="0.416"
+        app:layout_constraintStart_toEndOf="@+id/readcmzan" />
+
+    <!--踩数量-->
+    <TextView
+        android:id="@+id/readcmcainum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="200dp"
+        android:text="XX"
+        app:layout_constraintBottom_toBottomOf="@+id/readcmback"
+        app:layout_constraintStart_toEndOf="@+id/readcmzancopy" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="68dp"
+        android:layout_marginTop="200dp"
+        android:text="XXXXXXXXXXXXXX"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback" />
+
+
+
+</android.support.constraint.ConstraintLayout>
