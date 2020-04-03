@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<item  android:id="@+id/background" android:drawable="@drawable/leavemessage_mic"/>
+    <item android:id="@+id/progress">
+        <clip android:drawable="@drawable/leavemessage_mic_full" android:gravity="bottom" android:clipOrientation="vertical"/>
+    </item>
+</layer-list>
