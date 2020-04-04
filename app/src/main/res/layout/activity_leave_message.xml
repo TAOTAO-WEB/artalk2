@@ -1,9 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LeaveMessageActivity">
+    tools:context=".LeaveMessageActivity"
+    android:background="@drawable/img3">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/leavemessage_bg"
+        android:gravity="center"
+        >
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/leavemessage_btn"
+            android:src="@drawable/leavemessage_return"
+            />
+        <RelativeLayout
+            android:layout_width="300dp"
+            android:layout_height="400dp"
+            android:background="@drawable/leavemessage_block"
+            android:layout_centerInParent="true"
+            android:padding="25dp"
+            >
+            <RelativeLayout
+                android:id="@+id/lm_line1"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:layout_weight="1"
+                android:background="@drawable/leavemessage_textbg">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:textColor="#000000"
+                    android:id="@+id/lm_tv1"
+                    android:textSize="15dp"
+                    android:text="时间"/>
+                <TextView
+                    android:id="@+id/lm_tv2"
+                    android:layout_below="@id/lm_tv1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="20dp"
+                    android:textColor="#000000"
+                    android:textSize="20dp"
+                    android:text="我的便签："/>
+                <EditText
+                    android:id="@+id/lm_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/lm_tv2"
+                    android:hint="点击空白处输入文字"
+                    android:textSize="10dp"
+                    android:gravity="center"
+                    />
 
-</android.support.constraint.ConstraintLayout>
+            </RelativeLayout>
+            <ImageButton
+                android:id="@+id/lm_mic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#ffffff"
+                android:src="@drawable/leavemessage_popup"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="30dp"
+                android:layout_below="@id/lm_line1"/>
+            <ImageView
+                android:id="@+id/lm_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/lm_mic"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/leavemessage_start"
+                android:visibility="gone"
+                android:layout_above="@id/lm_tv3"/>
+
+            <TextView
+                android:id="@+id/lm_tv3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="长按进行录音"
+                android:gravity="center"
+                android:layout_below="@id/lm_mic"/>
+        </RelativeLayout>
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/leavemessage_btn_launch"
+            android:text="发布"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -3,4 +3,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_community">社区</string>
+    <string name="title_record">记录</string>
+    <string name="title_channel">频道</string>
+    <string name="title_mine">我的</string>
+    <string name="title_location"></string>
 </resources>
