@@ -1,6 +1,7 @@
 package cn.edu.hdu.artalk2;
 
 
+import android.support.v7.app.AppCompatActivity;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;

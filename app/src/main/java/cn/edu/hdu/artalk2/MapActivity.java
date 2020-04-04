@@ -58,7 +58,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//主界面
 public class MapActivity extends AppCompatActivity {
 
     //地图相关
