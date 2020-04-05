@@ -1,6 +1,8 @@
 package cn.edu.hdu.artalk2;
 
 
+
+import android.support.v7.app.AppCompatActivity;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -30,10 +32,8 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
 import static java.util.concurrent.TimeUnit.SECONDS;
-
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 //AR界面_扫描
 public class ScanActivity extends AppCompatActivity {

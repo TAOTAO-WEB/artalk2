@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/community"
+        android:icon="@mipmap/map_1"
+        android:title="@string/title_community" />
+
+    <item
+        android:id="@+id/record"
+        android:icon="@mipmap/map_2"
+        android:title="@string/title_record" />
+    <item
+        android:id="@+id/location"
+        android:icon="@mipmap/map_3"
+        android:title="@string/title_location" />
+
+    <item
+        android:id="@+id/channel"
+        android:icon="@mipmap/map_4"
+        android:title="@string/title_channel" />
+    <item
+        android:id="@+id/mine"
+        android:icon="@mipmap/map_5"
+        android:title="@string/title_mine" />
+
+</menu>
