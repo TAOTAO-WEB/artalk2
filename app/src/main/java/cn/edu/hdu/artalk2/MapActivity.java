@@ -319,7 +319,7 @@ public class MapActivity extends AppCompatActivity {
         //注册监听函数
         mLocationClient.registerLocationListener(myListener);
         //初始化图标
-        mIconLocation = BitmapDescriptorFactory.fromResource(R.mipmap.dituzhiyin);
+        mIconLocation = BitmapDescriptorFactory.fromResource(R.mipmap.dir);
         initOrientation();
         //开始定位
         mLocationClient.start();

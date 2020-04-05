@@ -100,7 +100,8 @@
         </activity>
 
         <activity android:name=".ReadActivity" />
-        <activity android:name=".MapActivity">
+        <activity android:name=".MapActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
