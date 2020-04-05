@@ -58,6 +58,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.edu.hdu.artalk2.NavigationFragment.TestFragment;
+import cn.edu.hdu.artalk2.adapter.ViewPagerAdapter;
+
 //主界面
 public class MapActivity extends AppCompatActivity {
 
@@ -79,6 +83,10 @@ public class MapActivity extends AppCompatActivity {
     public BDAbstractLocationListener myListener;
     private LatLng mLastLocationData;
     private boolean isFirstin = true;
+    private BottomNavigationView bottomNavigationView;
+    private ViewPagerAdapter viewPagerAdapter;
+    private ViewPager viewPager;
+    private MenuItem menuItem;
 
     //底部导航栏
 //    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -109,8 +117,10 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         SDKInitializer.initialize(getApplicationContext());//初始化SDK
         setContentView(R.layout.activity_map);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         SDKInitializer.setCoordType(CoordType.BD09LL);//定位编码设置
         this.context = this;
         mMapView = (MapView) findViewById(R.id.bmapView);
@@ -120,8 +130,65 @@ public class MapActivity extends AppCompatActivity {
         //两个按钮借口
         message_button();
         scan_buttton();
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
+        viewPager = (ViewPager) findViewById(R.id.vp);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                menuItem = bottomNavigationView.getMenu().getItem(position);
+                menuItem.setChecked(true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(viewPagerAdapter);
+        List<Fragment> list = new ArrayList<>();
+        list.add(TestFragment.newInstance("社区"));
+        list.add(TestFragment.newInstance("记录"));
+        list.add(TestFragment.newInstance("定位"));
+        list.add(TestFragment.newInstance("频道"));
+        list.add(TestFragment.newInstance("我的"));
+        viewPagerAdapter.setList(list);
+
 
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            menuItem = item;
+            switch (item.getItemId()) {
+                case R.id.community:
+                    viewPager.setCurrentItem(0);
+                    return true;
+                case R.id.record:
+                    viewPager.setCurrentItem(1);
+                    return true;
+                case R.id.location:
+                    viewPager.setCurrentItem(2);
+                    return true;
+                case R.id.channel:
+                    viewPager.setCurrentItem(3);
+                    return true;
+                case R.id.mine:
+                    viewPager.setCurrentItem(4);
+                    return true;
+            }
+            return false;
+        }
+    };
+
     //关于地图图层生命周期的五个方法
     protected void onStart() {
         super.onStart();
