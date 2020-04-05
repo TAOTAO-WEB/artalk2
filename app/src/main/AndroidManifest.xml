@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="cn.edu.hdu.artalk2">
+<<<<<<< HEAD
     <!-- 访问网络，进行地图相关业务数据请求，包括地图数据，路线规划，POI检索等 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- 获取网络状态，根据网络状态切换进行数据请求网络转换 -->
@@ -41,6 +42,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- 访问精确位置的权限 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+=======
+>>>>>>> upstream/master
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions" />
@@ -74,6 +77,7 @@
             the app. For an "AR Optional" app, specify "optional" instead of "required". -->
         <meta-data android:name="com.google.ar.core" android:value="required" />
 
+<<<<<<< HEAD
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="OdRgrwbeEhxa4o0hDScYtxVBmvUWXizn" />
@@ -82,6 +86,8 @@
             android:process=":remote">
         </service>
 
+=======
+>>>>>>> upstream/master
         <activity android:name=".LeaveMessageActivity"/>
 
         <activity android:name=".ScanActivity"

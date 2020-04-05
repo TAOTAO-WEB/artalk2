@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion "29.0.0"
 
     defaultConfig {
         applicationId "cn.edu.hdu.artalk2"
@@ -24,6 +23,7 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+<<<<<<< HEAD
     sourceSets {
         main {
             jniLibs.srcDirs = [ 'libs']
@@ -35,10 +35,15 @@ android {
         // 防止在发布的时候出现因MissingTranslation导致Build Failed!
         disable 'MissingTranslation'
     }
+=======
+>>>>>>> upstream/master
 
 }
 
 dependencies {
+
+    api project(":sceneformux")
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(':sceneformux')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
