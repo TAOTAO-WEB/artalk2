@@ -1,5 +1,8 @@
 package cn.edu.hdu.artalk2;
 
+import android.app.Service;
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -23,7 +26,7 @@ import java.text.SimpleDateFormat;
 public class LeaveMessageActivity extends AppCompatActivity {
 
     private static final String TAG ="message" ;
-    private TextView lm_date,lm_time;
+    private TextView lm_date,lm_time,bt_submit;
     private ImageView lm_start;
     private ImageButton lm_mic;
     private EditText lm_et;
@@ -48,6 +51,7 @@ public class LeaveMessageActivity extends AppCompatActivity {
         lm_mic = findViewById(R.id.lm_mic);
         lm_et = findViewById(R.id.lm_et);
         lm_start=findViewById(R.id.lm_start);
+        bt_submit=findViewById(R.id.bt_submit);
 
         //显示时间
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd   HH:mm:ss");
@@ -67,7 +71,7 @@ public class LeaveMessageActivity extends AppCompatActivity {
             }
 
         }
-
+//长按录音功能的实现
         lm_mic.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -91,20 +95,30 @@ public class LeaveMessageActivity extends AppCompatActivity {
                 return false;
             }
         });
+        //试听
         lm_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mp=new MediaPlayer();
-                try {
-                    mp.setDataSource(soundFile.getPath());
-                    mp.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (!isStart) {
+                    mp = new MediaPlayer();
+                    try {
+                        mp.setDataSource(soundFile.getPath());
+                        mp.prepare();
+                        isStart = true;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-                mp.start();
+                if (isStart)
+                    mp.start();
             }
         });
+        bt_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+            }
+        });
 
 
     }
@@ -166,4 +180,6 @@ public class LeaveMessageActivity extends AppCompatActivity {
     //释放资源
     private void releaseRecord(){
     }
+
+
 }

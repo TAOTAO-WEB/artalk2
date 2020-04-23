@@ -92,6 +92,7 @@
                 android:layout_below="@id/lm_mic"/>
         </RelativeLayout>
         <TextView
+            android:id="@+id/bt_submit"
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
