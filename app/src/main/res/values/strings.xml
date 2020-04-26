@@ -9,4 +9,6 @@
     <string name="title_channel">频道</string>
     <string name="title_mine">我的</string>
     <string name="title_location"></string>
+
+    <string name="plane_finding">Searching for surfaces&#8230;</string>
 </resources>
