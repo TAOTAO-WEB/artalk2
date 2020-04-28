@@ -1,6 +1,5 @@
 package cn.edu.hdu.artalk2;
 
-
 import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
 import android.app.ActionBar;
@@ -34,8 +33,11 @@ import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.google.android.material.internal.*;
 
@@ -84,9 +86,10 @@ public class MapActivity extends AppCompatActivity {
     private LatLng mLastLocationData;
     private boolean isFirstin = true;
     private BottomNavigationView bottomNavigationView;
-    private ViewPagerAdapter viewPagerAdapter;
+    private ViewPager viewPagerAdapter;
     private ViewPager viewPager;
     private MenuItem menuItem;
+    private Marker marker;
 
     //底部导航栏
 //    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -127,6 +130,7 @@ public class MapActivity extends AppCompatActivity {
         //获取地图控件引用
         mBaiduMap = mMapView.getMap();//显示地图
         initMyLocation();//初始化位置方法
+        InitMarker();
         //两个按钮借口
         message_button();
         scan_buttton();
@@ -151,16 +155,16 @@ public class MapActivity extends AppCompatActivity {
 
             }
         });
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(viewPagerAdapter);
+        //viewPagerAdapter = new  ViewPagerAdapter(getSupportFragmentManager());
+        //viewPager.setAdapter(viewPagerAdapter);
         List<Fragment> list = new ArrayList<>();
         list.add(TestFragment.newInstance("社区"));
         list.add(TestFragment.newInstance("记录"));
         list.add(TestFragment.newInstance("定位"));
         list.add(TestFragment.newInstance("频道"));
         list.add(TestFragment.newInstance("我的"));
-        viewPagerAdapter.setList(list);
-
+        //viewPagerAdapter.setList(list);
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
     }
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -189,6 +193,36 @@ public class MapActivity extends AppCompatActivity {
         }
     };
 
+    //实现地图上标记marker
+    private  void InitMarker()
+    {
+        //定义Maker坐标点
+        LatLng point = new LatLng(40.963175, 114.400244);
+        LatLng point1 = new LatLng(40.45451,114.5686);
+        //构建Marker图标
+        BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.scan);
+        //构建MarkerOption，用于在地图上添加Marker
+        OverlayOptions options= new MarkerOptions().position(point).icon(bitmap).visible(true).flat(true);
+        //在地图上添加Marker，并显示
+        marker = (Marker)mBaiduMap.addOverlay(options);
+        mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                Toast.makeText(MapActivity.this,"点击了marker",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+    }
+    private void clearOverlay()
+    {
+        mBaiduMap.clear();
+        marker =null;
+    }
+    private  void resetOverlay()
+    {
+        clearOverlay();
+        InitMarker();
+    }
     //关于地图图层生命周期的五个方法
     protected void onStart() {
         super.onStart();
