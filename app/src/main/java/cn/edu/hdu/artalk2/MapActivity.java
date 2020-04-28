@@ -1,5 +1,6 @@
 package cn.edu.hdu.artalk2;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
 import android.app.ActionBar;
@@ -27,6 +28,7 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.http.HttpClient;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -58,11 +60,15 @@ import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.hdu.artalk2.NavigationFragment.TestFragment;
 import cn.edu.hdu.artalk2.adapter.ViewPagerAdapter;
+
+import static com.baidu.location.h.l.u;
 
 //主界面
 public class MapActivity extends AppCompatActivity {
@@ -90,32 +96,34 @@ public class MapActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private MenuItem menuItem;
     private Marker marker;
+    String location, id;
+    private String url = "http://10.0.2.2:8080/Android/LoginServlet";
 
     //底部导航栏
-//    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
-//        @Override
-//        //底部导航栏切换界面
-//        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//            switch (menuItem.getItemId()){
-//                case R.id.community:
-//                    Toast.makeText(MapActivity.this,"点击跳转到社区community",Toast.LENGTH_SHORT).show();
-//                    return true;
-//                case R.id.record:
-//                    Toast.makeText(MapActivity.this,"点击跳转到记录record界面",Toast.LENGTH_SHORT).show();
-//                    return true;
-//                case R.id.location:
-//                    Toast.makeText(MapActivity.this,"点击在此定位",Toast.LENGTH_SHORT).show();
-//                    return true;
-//                case R.id.channel:
-//                    Toast.makeText(MapActivity.this,"点击跳转到频道channel界面",Toast.LENGTH_SHORT).show();
-//                    return true;
-//                case R.id.mine:
-//                    Toast.makeText(MapActivity.this,"点击跳转到我的mine界面",Toast.LENGTH_SHORT).show();
-//                    return true;
-//            }
-//            return false;
-//        }
-//    };
+    /*private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        //底部导航栏切换界面
+        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+            switch (menuItem.getItemId()){
+                case R.id.community:
+                    Toast.makeText(MapActivity.this,"点击跳转到社区community",Toast.LENGTH_SHORT).show();
+                    return true;
+                case R.id.record:
+                    Toast.makeText(MapActivity.this,"点击跳转到记录record界面",Toast.LENGTH_SHORT).show();
+                    return true;
+                case R.id.location:
+                    Toast.makeText(MapActivity.this,"点击在此定位",Toast.LENGTH_SHORT).show();
+                    return true;
+                case R.id.channel:
+                    Toast.makeText(MapActivity.this,"点击跳转到频道channel界面",Toast.LENGTH_SHORT).show();
+                    return true;
+                case R.id.mine:
+                    Toast.makeText(MapActivity.this,"点击跳转到我的mine界面",Toast.LENGTH_SHORT).show();
+                    return true;
+            }
+            return false;
+        }
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,6 +204,7 @@ public class MapActivity extends AppCompatActivity {
     //实现地图上标记marker
     private  void InitMarker()
     {
+        mBaiduMap.clear();
         //定义Maker坐标点
         LatLng point = new LatLng(40.963175, 114.400244);
         LatLng point1 = new LatLng(40.45451,114.5686);
@@ -218,11 +227,11 @@ public class MapActivity extends AppCompatActivity {
         mBaiduMap.clear();
         marker =null;
     }
-    private  void resetOverlay()
+    /*private  void resetOverlay()
     {
         clearOverlay();
         InitMarker();
-    }
+    }*/
     //关于地图图层生命周期的五个方法
     protected void onStart() {
         super.onStart();
@@ -376,6 +385,114 @@ public class MapActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    /*private class PostUtils {
+    public  static String LOGIN_URL = "http://172.16.2.54:8080/HttpTest/ServletForPost";
+    public static String LoginByPost(String number,String passwd)
+    {
+        String msg = "";
+        try{
+            HttpURLConnection conn = (HttpURLConnection) new URL(LOGIN_URL).openConnection();
+            //设置请求方式,请求超时信息
+            conn.setRequestMethod("POST");
+            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(5000);
+            //设置运行输入,输出:
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            //Post方式不能缓存,需手动设置为false
+            conn.setUseCaches(false);
+            //我们请求的数据:
+            String data = "passwd="+ URLEncoder.encode(passwd, "UTF-8")+
+                    "&number="+ URLEncoder.encode(number, "UTF-8");
+            //这里可以写一些请求头的东东...
+            //获取输出流
+            OutputStream out = conn.getOutputStream();
+            out.write(data.getBytes());
+            out.flush();
+             if (conn.getResponseCode() == 200) {
+                    // 获取响应的输入流对象
+                    InputStream is = conn.getInputStream();
+                    // 创建字节输出流对象
+                    ByteArrayOutputStream message = new ByteArrayOutputStream();
+                    // 定义读取的长度
+                    int len = 0;
+                    // 定义缓冲区
+                    byte buffer[] = new byte[1024];
+                    // 按照缓冲区的大小，循环读取
+                    while ((len = is.read(buffer)) != -1) {
+                        // 根据读取的长度写入到os对象中
+                        message.write(buffer, 0, len);
+                    }
+                    // 释放资源
+                    is.close();
+                    message.close();
+                    // 返回字符串
+                    msg = new String(message.toByteArray());
+                    return msg;
+             }
+        }catch(Exception e){e.printStackTrace();}
+        return msg;
+    }
+}*/
+
+
+    /*private void MarkerSet(){
+    //mLastLocationData传入数据库
+    Latang mlocationdata = new Latlang(mLangtitude,mLatitude);
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.location:
+            new Thread() {
+        @Override
+        public void run() {
+            ArrayList<LocationList> arrayList = new ArrayList<LocationList>();
+            ArrayList.add(mlocationdata);
+            try {
+                HttpEntity requestHttpEntity = new UrlEncodedFormEntity(pairList);
+                // URl是接口地址
+                HttpPost httpPost = new HttpPost(url);
+                // 将请求体内容加入请求中
+                httpPost.setEntity(requestHttpEntity);
+                // 需要客户端对象来发送请求
+                HttpClient httpClient = new DefaultHttpClient();
+                // 发送请求
+                HttpResponse response = httpClient.execute(httpPost);
+                // 显示响应
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }.start();
+                break;
 }
+    private static boolean getInfo(HttpResponse response) throws Exception {
+
+        HttpEntity httpEntity = response.getEntity();
+        InputStream inputStream = httpEntity.getContent();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        while (null != (line = reader.readLine())){
+            result += line;
+        }
+        if(result.equals("success")) {
+            return true;
+        }
+        return false;
+    }
+    //数据库返回对应的在范围内的点
+    ArrayList<LocationListMarker> arrayList = new ArrayList<LocationListMarker>();
+    String sql = "SELECT * FROM ... WHERE +langtitude +>= 80 AND +longtitude >=80;"
+
+
+
+    while(ArrayList 没有循环完毕){
+        set marker visible
+    }
+    }
+   */
+        }
+
 
 
