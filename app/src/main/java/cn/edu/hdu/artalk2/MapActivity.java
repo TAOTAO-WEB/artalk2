@@ -533,7 +533,6 @@ private void MarkerSet() {
                     .post(RequestBody.create(mediaType, requestBodyo))
                     .build();
             OkHttpClient okHttpClient = new OkHttpClient();
-            okHttpClient
             okHttpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
