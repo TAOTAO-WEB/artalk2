@@ -1,6 +1,7 @@
 package cn.edu.hdu.artalk2;
 
 import android.content.Intent;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
 import android.app.ActionBar;
@@ -32,6 +33,7 @@ import com.baidu.mapapi.http.HttpClient;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -41,6 +43,11 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeOption;
+import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.google.android.material.internal.*;
 
 import android.support.annotation.NonNull;
@@ -60,15 +67,27 @@ import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.edu.hdu.artalk2.NavigationFragment.TestFragment;
 import cn.edu.hdu.artalk2.adapter.ViewPagerAdapter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static com.baidu.location.h.l.u;
+import static com.baidu.location.h.l.v;
 
 //主界面
 public class MapActivity extends AppCompatActivity {
@@ -98,6 +117,7 @@ public class MapActivity extends AppCompatActivity {
     private Marker marker;
     String location, id;
     private String url = "http://10.0.2.2:8080/Android/LoginServlet";
+    public static final  String TAG="MapActivity";
 
     //底部导航栏
     /*private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -173,6 +193,7 @@ public class MapActivity extends AppCompatActivity {
         list.add(TestFragment.newInstance("我的"));
         //viewPagerAdapter.setList(list);
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        MarkerSet();
 
     }
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -386,8 +407,7 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
-
-    /*private class PostUtils {
+/*private class PostUtils {
     public  static String LOGIN_URL = "http://172.16.2.54:8080/HttpTest/ServletForPost";
     public static String LoginByPost(String number,String passwd)
     {
@@ -437,62 +457,138 @@ public class MapActivity extends AppCompatActivity {
     }
 }*/
 
-
-    /*private void MarkerSet(){
-    //mLastLocationData传入数据库
-    Latang mlocationdata = new Latlang(mLangtitude,mLatitude);
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.location:
-            new Thread() {
+/*private void MarkerPut(){
+    if (!TextUtils.isEmpty(address)){
+        if (!addressData.contains(address)){  //过滤掉相同的地址信息
+            addressData.add(address);
+            mSearch.geocode(new GeoCodeOption()     //进行编码
+                    .city("")
+                    .address(address));
+            logUtils.d("地址反编码"+":"+address);
+            mapInfoData.add(new mapinfoBean(name,next.getVisitStatusText(),next.getCustomerName(),next.getAddress(),next.getCaseCode(),next.getVisitGuid()));
+        }
+    }
+    OnGetGeoCoderResultListener GeoListener = new OnGetGeoCoderResultListener() {
         @Override
-        public void run() {
-            ArrayList<LocationList> arrayList = new ArrayList<LocationList>();
-            ArrayList.add(mlocationdata);
-            try {
-                HttpEntity requestHttpEntity = new UrlEncodedFormEntity(pairList);
-                // URl是接口地址
-                HttpPost httpPost = new HttpPost(url);
-                // 将请求体内容加入请求中
-                httpPost.setEntity(requestHttpEntity);
-                // 需要客户端对象来发送请求
-                HttpClient httpClient = new DefaultHttpClient();
-                // 发送请求
-                HttpResponse response = httpClient.execute(httpPost);
-                // 显示响应
-            } catch (Exception e) {
-                e.printStackTrace();
+        public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
+            if (null != geoCodeResult && null != geoCodeResult.getLocation()) {
+                if (geoCodeResult == null || geoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
+                    //没有检索到结果
+                    return;
+                } else {
+                    service_flag=true;
+                    double latitude = geoCodeResult.getLocation().latitude;
+                    double longitude = geoCodeResult.getLocation().longitude;
+                    LatLng latLng=new LatLng(latitude,longitude );
+                    logUtils.d("地理反编码地址"+"latitude"+latitude+"longitude"+longitude);
+                    servicePoint = new LatLng(latitude, longitude);
+                    //创建OverlayOptions属性
+                    //  lv_mainItemPostion
+                    mapInfoBean mapInfoBean=null;
+                    if (!click_address_item_flag){
+
+                        mapInfoBean = mapInfoData.get(currrentCount);
+                        currrentCount++;    //循环
+                    }else {
+                        mapInfoBean = mapInfoData.get(lv_mainItemPostion);
+                    }
+                    BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.man);
+                    OverlayOptions option1 =  new MarkerOptions()
+                            .position(servicePoint)
+                            .icon(bitmap);
+                    marker = (Marker) map.addOverlay(option1);
+                    Bundle bundle=new Bundle();
+                    bundle.putSerializable("info", mapInfoBean);   //携带对象数据
+                    marker.setExtraInfo(bundle);
+                    MapStatus mMapStatus = new MapStatus.Builder()
+                            .target(latLng)
+                            .zoom(15)
+                            .build();
+                    //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
+                    MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
+//改变地图状态
+                    mBaiduMap.animateMapStatus(mMapStatusUpdate);
+
+                }
             }
         }
 
-    }.start();
-                break;
-}
-    private static boolean getInfo(HttpResponse response) throws Exception {
+        @Override
+        public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
 
-        HttpEntity httpEntity = response.getEntity();
-        InputStream inputStream = httpEntity.getContent();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        while (null != (line = reader.readLine())){
-            result += line;
         }
-        if(result.equals("success")) {
-            return true;
+    };}*/
+
+
+private void MarkerSet() {
+    //mLastLocationData传入数据库
+    LatLng mlocationdata = new LatLng(mLongtitude, mLatitude);
+    new Thread() {
+        @Override
+        public void run() {
+            MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
+            String requestBodyo = String.valueOf ((int)mLongtitude);
+            Request request = new Request.Builder()
+                    .url("https://api.github.com/markdown/raw")
+                    .post(RequestBody.create(mediaType, requestBodyo))
+                    .build();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            okHttpClient
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.d(TAG, "onFailure: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    //Log.d(TAG, response.protocol() + " " + response.code() + " " + response.message());
+                    Headers headers = response.headers();
+                    for (int i = 0; i < headers.size(); i++) {
+                        Log.d(TAG, headers.name(i) + ":" + headers.value(i));
+                    }
+                    Log.d(TAG, "onResponse: " + response.body().string());
+                }
+            });
+            Map<String,String>map = new HashMap<>();
+            map.put("cx","120；");
+            map.put("cy","30");
+
         }
-        return false;
-    }
+};
+
     //数据库返回对应的在范围内的点
-    ArrayList<LocationListMarker> arrayList = new ArrayList<LocationListMarker>();
-    String sql = "SELECT * FROM ... WHERE +langtitude +>= 80 AND +longtitude >=80;"
-
-
-
-    while(ArrayList 没有循环完毕){
-        set marker visible
-    }
-    }
-   */
+    ArrayList<Integer> markerarrayListlong = new ArrayList<Integer>();
+    ArrayList<Integer> markerarrayListlan = new ArrayList<Integer>();
+    String sql = "'SELECT * FROM ... WHERE '+langtitude +'>= 80 AND '+longtitude '>=80;";
+    //ArrayList<Pair<Integer,Integer>>markerlist = new  ArrayList<Pair<Integer,Integer>>();
+    int k =0;
+    while(k<4){
+        //markerlist.add((int)mLatitude,(Integer)mLongtitude);
+        markerarrayListlan.add((int)mLatitude);
+        markerarrayListlong.add((int)mLongtitude);
+        for (int i=0;i<=markerarrayListlan.size();i++)
+        {
+            double longti=0,lati=0;
+            LatLng point = new LatLng(markerarrayListlan.get(i),markerarrayListlong.get(i));
+            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.icon);
+            //构建MarkerOption，用于在地图上添加Marker
+            OverlayOptions options= new MarkerOptions().position(point).icon(bitmap).visible(true).flat(true);
+            //在地图上添加Marker，并显示
+            marker = (Marker)mBaiduMap.addOverlay(options);
         }
+        k++;
+    }
 
+    //为所有marker设置点击事件
+    mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            Toast.makeText(MapActivity.this,"点击了marker",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    });
+}
+}
 
 
