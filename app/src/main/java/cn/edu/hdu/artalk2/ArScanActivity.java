@@ -15,16 +15,28 @@
  */
 package cn.edu.hdu.artalk2;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
@@ -42,10 +54,20 @@ import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import cn.edu.hdu.artalk2.dto.Message;
+import cn.edu.hdu.artalk2.service.GetMessageListService;
 import cn.edu.hdu.artalk2.utils.ArUtils;
+import cn.edu.hdu.artalk2.utils.OkHttpManager;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * ar扫描界面
@@ -67,6 +89,95 @@ public class ArScanActivity extends AppCompatActivity {
   // True once the scene has been placed.
   private boolean hasPlacedSolarSystem = false;
 
+  LocationClient mLocationClient;
+
+  private GetMessageListService mService;
+  private boolean mBound = false;
+
+
+  /*网络请求相关变量*/
+  private static final String POST_COORDINATE_URL = "http://47.112.174.246:3389/getMessage/";
+  // 返回的message列表
+  private List<Message> messageList;
+
+  private static final String TAG = "ArScanActivity";
+  /**
+   * 位置变化监听器
+   */
+  class MyLocationListener extends BDAbstractLocationListener {
+    @Override
+    public void onReceiveLocation(BDLocation location) {
+
+      if (location == null){
+        return;
+      }
+
+      //获取纬度信息
+      double latitude = location.getLatitude();
+      //获取经度信息
+      double longitude = location.getLongitude();
+      //获取定位精度，默认值为0.0f
+      float radius = location.getRadius();
+      // 获取手机方向
+      float direction = location.getDirection();
+      //获取经纬度坐标类型，以LocationClientOption中设置过的坐标类型为准
+      String coorType = location.getCoorType();
+      //获取定位类型、定位错误返回码，具体信息可参照类参考中BDLocation类中的说明
+      int errorCode = location.getLocType();
+
+      String toast = "纬度："+latitude+"，经度："+longitude+"，精度:"+
+              radius+", 方向:"+direction+",errorCode:"+errorCode;
+
+      Log.i(TAG,toast);
+      Toast.makeText(ArScanActivity.this,toast,Toast.LENGTH_SHORT).show();
+
+      Map<String,String> map = new HashMap<>();
+      map.put("Cx",String.valueOf(Math.round(latitude)));
+      map.put("Cy",String.valueOf(Math.round(longitude)));
+//    map.put("mId","10");
+
+      OkHttpManager.getInstance().sendComplexFrom("http://47.112.174.246:3389/getMessage/", map,new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+          Log.e("posterror",e.getMessage());
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+          String res = response.body().string();
+
+          Log.d("response",res);
+          Log.d("body", response.body().string());
+
+          ObjectMapper mapper = new ObjectMapper();
+
+          messageList = mapper.readValue(res, new TypeReference<List<Message>>(){});
+
+          Log.d("messageList",messageList.toString());
+
+        }
+      });
+
+    }
+  }
+
+  /** Defines callbacks for service binding, passed to bindService() */
+  private ServiceConnection connection = new ServiceConnection() {
+
+    @Override
+    public void onServiceConnected(ComponentName className,
+                                   IBinder service) {
+      // We've bound to LocalService, cast the IBinder and get LocalService instance
+      GetMessageListService.GetMessagesBinder binder = (GetMessageListService.GetMessagesBinder) service;
+      mService = binder.getService();
+      mBound = true;
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName arg0) {
+      mBound = false;
+    }
+  };
   @Override
   @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
   // CompletableFuture requires api level 24
@@ -78,8 +189,22 @@ public class ArScanActivity extends AppCompatActivity {
       return;
     }
 
+    // 开启定位
+    locationStart();
+
     setContentView(R.layout.activity_ar_scan);
     arSceneView = findViewById(R.id.ar_scene_view);
+
+
+    // 跳转到放置留言页面
+    ImageButton leaveBtn = findViewById(R.id.leave_message_btn2);
+    leaveBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = new Intent(ArScanActivity.this,LeaveMessageActivity.class);
+        startActivity(intent);
+      }
+    });
 
 
     // Build a renderable from a 2D View.
@@ -172,6 +297,17 @@ public class ArScanActivity extends AppCompatActivity {
     ArUtils.requestCameraPermission(this, RC_PERMISSIONS);
   }
 
+
+//  @Override
+//  protected void onStart() {
+//    super.onStart();
+//    Intent intent = new Intent(this,GetMessageListService.class);
+//    bindService(intent,connection, Context.BIND_AUTO_CREATE);
+//
+//    //todo 服务改成url请求
+//    List<Message> list = mService.getMessageList();
+//  }
+
   @Override
   protected void onResume() {
     super.onResume();
@@ -220,6 +356,13 @@ public class ArScanActivity extends AppCompatActivity {
       arSceneView.pause();
     }
   }
+
+//  @Override
+//  protected void onStop() {
+//    super.onStop();
+//    unbindService(connection);
+//    mBound = false;
+//  }
 
   @Override
   public void onDestroy() {
@@ -337,4 +480,46 @@ public class ArScanActivity extends AppCompatActivity {
     loadingMessageSnackbar.dismiss();
     loadingMessageSnackbar = null;
   }
+
+  /**
+   * 开启定位功能
+   */
+  private void locationStart() {
+    //定位初始化
+    mLocationClient = new LocationClient(getApplicationContext());
+
+    //通过LocationClientOption设置LocationClient相关参数
+    LocationClientOption option = new LocationClientOption();
+    option.setOpenGps(true); // 打开gps
+    option.setCoorType("bd09ll"); // 设置坐标类型
+    option.setScanSpan(5000);// 设置发起连续定位请求的间隔需要大于等于1000ms才是有效的
+    option.setNeedDeviceDirect(true); // 设置是否需要设备方向结果
+    //可选，默认false，设置是否当gps有效时按照1S1次频率输出GPS结果
+    option.setLocationNotify(false);
+    option.setIgnoreKillProcess(false);
+
+    //设置打开自动回调位置模式，该开关打开后，
+    // 期间只要定位SDK检测到位置变化就会主动回调给开发者，
+    // 该模式下开发者无需再关心定位间隔是多少，
+    // 定位SDK本身发现位置变化就会及时回调给开发者
+//    option.setOpenAutoNotifyMode();
+
+    //　参数含义：
+    // minTimeInterval:3000
+    // minDistance: 1
+    // locSensitivity:
+//    option.setOpenAutoNotifyMode(3000,2,LocationClientOption.LOC_SENSITIVITY_HIGHT);
+
+
+    //设置locationClientOption
+    mLocationClient.setLocOption(option);
+
+    //注册LocationListener监听器
+    MyLocationListener myLocationListener = new MyLocationListener();
+    mLocationClient.registerLocationListener(myLocationListener);
+    //开启地图定位图层
+    mLocationClient.start();
+  }
+
+
 }
