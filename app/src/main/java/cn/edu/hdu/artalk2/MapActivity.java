@@ -1,6 +1,7 @@
 package cn.edu.hdu.artalk2;
 
 import android.content.Intent;
+import android.support.design.widget.BottomNavigationView.OnNavigationItemSelectedListener;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
@@ -33,6 +34,8 @@ import com.baidu.mapapi.http.HttpClient;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.GroundOverlayOptions;
+import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
@@ -43,6 +46,7 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.model.LatLngBounds;
 import com.baidu.mapapi.search.core.SearchResult;
 import com.baidu.mapapi.search.geocode.GeoCodeOption;
 import com.baidu.mapapi.search.geocode.GeoCodeResult;
@@ -65,6 +69,7 @@ import android.hardware.SensorManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -74,9 +79,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import cn.edu.hdu.artalk2.NavigationFragment.TestFragment;
 import cn.edu.hdu.artalk2.adapter.ViewPagerAdapter;
+import cn.edu.hdu.artalk2.utils.OkHttpManager;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
@@ -85,6 +92,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.BufferedSink;
+
+import android.support.v4.view.ViewPager;
 
 import static com.baidu.location.h.l.u;
 import static com.baidu.location.h.l.v;
@@ -92,35 +103,103 @@ import static com.baidu.location.h.l.v;
 //主界面
 public class MapActivity extends AppCompatActivity {
 
-    //地图相关
+    /**地图相关*/
     private MapView mMapView = null;
     private BaiduMap mBaiduMap = null;
     private Context context;
+    /**两个按钮*/
     private ImageButton message_button = null;
     private ImageButton scan_button = null;
-    //定位相关
+    /**定位相关*/
     private double mLatitude;
     private double mLongtitude;
-    //方向传感器
-    private MyOrientationListener mMyOrientationListener;
-    private float mCurrentX;
-    //自定义图标
-    private BitmapDescriptor mIconLocation;
     private LocationClient mLocationClient;
     public BDAbstractLocationListener myListener;
     private LatLng mLastLocationData;
     private boolean isFirstin = true;
+    double Lat = 0;
+    double Lon = 0;
+    /**方向传感器*/
+    private MyOrientationListener mMyOrientationListener;
+    private float mCurrentX;
+    //自定义图标
+    private BitmapDescriptor mIconLocation;
+   /**导航栏相关*/
     private BottomNavigationView bottomNavigationView;
     private ViewPager viewPagerAdapter;
     private ViewPager viewPager;
     private MenuItem menuItem;
-    private Marker marker;
+    /**okhttp相关*/
     String location, id;
-    private String url = "http://10.0.2.2:8080/Android/LoginServlet";
-    public static final  String TAG="MapActivity";
+    public static final String url = "http://47.112.174.246:3389/getMessage";
+    public static final String TAG="MapActivity";
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //全屏显示
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //初始化SDK
+        SDKInitializer.initialize(getApplicationContext());
+        //显示地图
+        setContentView(R.layout.activity_map);
+        //全屏显示
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //定位编码设置
+        SDKInitializer.setCoordType(CoordType.BD09LL);
+        this.context = this;
+        //获取地图控件引用
+        mMapView = (MapView) findViewById(R.id.bmapView);
+        mBaiduMap = mMapView.getMap();//显示地图
+        //初始化位置方法
+        initMyLocation();
+        GetMarkerLocation();
+        //两个按钮接口
+        message_button();
+        scan_buttton();
+        //底部导航栏设置
+        /*bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
+        viewPager = (ViewPager) findViewById(R.id.vp);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                menuItem = bottomNavigationView.getMenu().getItem(position);
+                menuItem.setChecked(true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });*/
+        /*viewPagerAdapter =new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter = new  ViewPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(viewPagerAdapter);
+        List<Fragment> list = new ArrayList<>();
+        list.add(TestFragment.newInstance("社区"));
+        list.add(TestFragment.newInstance("记录"));
+        list.add(TestFragment.newInstance("定位"));
+        list.add(TestFragment.newInstance("频道"));
+        list.add(TestFragment.newInstance("我的"));
+        viewPagerAdapter.setList(list);*/
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //设置MARKER
+        setMarker();
+        //NavigationView();
+    }
 
     //底部导航栏
-    /*private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+    /*private void NavigationView(){
+    public OnNavigationItemSelectedListener onNavigationItemSelectedListener
+            = new OnNavigationItemSelectedListener() {
         @Override
         //底部导航栏切换界面
         public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -143,61 +222,10 @@ public class MapActivity extends AppCompatActivity {
             }
             return false;
         }
-    };*/
+    };}*/
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        SDKInitializer.initialize(getApplicationContext());//初始化SDK
-        setContentView(R.layout.activity_map);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        SDKInitializer.setCoordType(CoordType.BD09LL);//定位编码设置
-        this.context = this;
-        mMapView = (MapView) findViewById(R.id.bmapView);
-        //获取地图控件引用
-        mBaiduMap = mMapView.getMap();//显示地图
-        initMyLocation();//初始化位置方法
-        InitMarker();
-        //两个按钮借口
-        message_button();
-        scan_buttton();
-        bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
-        bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
-        viewPager = (ViewPager) findViewById(R.id.vp);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                menuItem = bottomNavigationView.getMenu().getItem(position);
-                menuItem.setChecked(true);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-        //viewPagerAdapter = new  ViewPagerAdapter(getSupportFragmentManager());
-        //viewPager.setAdapter(viewPagerAdapter);
-        List<Fragment> list = new ArrayList<>();
-        list.add(TestFragment.newInstance("社区"));
-        list.add(TestFragment.newInstance("记录"));
-        list.add(TestFragment.newInstance("定位"));
-        list.add(TestFragment.newInstance("频道"));
-        list.add(TestFragment.newInstance("我的"));
-        //viewPagerAdapter.setList(list);
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        MarkerSet();
-
-    }
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             menuItem = item;
@@ -222,38 +250,76 @@ public class MapActivity extends AppCompatActivity {
         }
     };
 
-    //实现地图上标记marker
-    private  void InitMarker()
-    {
-        mBaiduMap.clear();
+    /**
+     * marker相关*/
+
+    //添加单个marker
+    private void setMarker() {
+        Log.v("pcw","setMarker : lat : "+ Lat+" lon : " + Lon);
         //定义Maker坐标点
-        LatLng point = new LatLng(40.963175, 114.400244);
-        LatLng point1 = new LatLng(40.45451,114.5686);
+        Lat = 40.8073029300;
+        Lon= 114.8804802800;
+        LatLng point = new LatLng(Lat, Lon);
         //构建Marker图标
-        BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.scan);
+        BitmapDescriptor bitmap = BitmapDescriptorFactory
+                .fromResource(R.drawable.icon2);
         //构建MarkerOption，用于在地图上添加Marker
-        OverlayOptions options= new MarkerOptions().position(point).icon(bitmap).visible(true).flat(true);
+        OverlayOptions option = new MarkerOptions()
+                .position(point)
+                .icon(bitmap);
         //在地图上添加Marker，并显示
-        marker = (Marker)mBaiduMap.addOverlay(options);
+        mBaiduMap.addOverlay(option);
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            //marker被点击时回调的方法
+            //若响应点击事件，返回true，否则返回false
+            //默认返回false
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Toast.makeText(MapActivity.this,"点击了marker",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapActivity.this, "点击了MARKER", Toast.LENGTH_SHORT);
                 return false;
             }
         });
     }
-    private void clearOverlay()
-    {
-        mBaiduMap.clear();
-        marker =null;
+
+    //刷新将定位点置于屏幕中央
+    private void setUserMapCenter() {
+        Log.v("pcw","setUserMapCenter : lat : "+ mLatitude+" lon : " + mLongtitude);
+        LatLng cenpt = new LatLng(mLatitude,mLongtitude);
+//定义地图状态
+        MapStatus mMapStatus = new MapStatus.Builder()
+                .target(cenpt)
+                .zoom(18)
+                .build();
+//定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
+        MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
+//改变地图状态
+        mBaiduMap.setMapStatus(mMapStatusUpdate);
     }
-    /*private  void resetOverlay()
-    {
-        clearOverlay();
-        InitMarker();
-    }*/
-    //关于地图图层生命周期的五个方法
+
+    //添加多个marker
+    private void SetMarkerGroup(){
+
+
+
+
+        MarkerClick();
+
+    }
+    //设置单击事件
+    private void MarkerClick(){
+        mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                PostMarkerLocation();
+                Toast.makeText(MapActivity.this,"点击了MARKER",Toast.LENGTH_SHORT);
+                return false;
+            }
+        });
+    }
+
+    /**
+       *关于地图图层生命周期的五个方法
+     */
     protected void onStart() {
         super.onStart();
         //开启定位
@@ -286,11 +352,13 @@ public class MapActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBaiduMap.setMyLocationEnabled(false);
-        mMapView.onDestroy();
         mMapView = null;
+        mMapView.onDestroy();
+
     }
 
-    //按钮响应
+    /**
+    *按钮响应*/
     // 点击信息跳转
     private void message_button() {
         //按钮
@@ -303,7 +371,7 @@ public class MapActivity extends AppCompatActivity {
             }
         });
     }
-//点击扫描跳转
+    //点击扫描跳转
     public void scan_buttton(){
         ImageButton scan_button = (ImageButton)findViewById(R.id.scan_button);
         scan_button.setOnClickListener(new View.OnClickListener() {
@@ -315,7 +383,8 @@ public class MapActivity extends AppCompatActivity {
     }
 
 
-    //定位
+    /**
+     * 定位*/
     private class MyLocationListener extends BDAbstractLocationListener {
         @Override
         public void onReceiveLocation(BDLocation location) {
@@ -359,6 +428,8 @@ public class MapActivity extends AppCompatActivity {
                     Toast.makeText(context, "定位:手机模式错误，请检查是否飞行", Toast.LENGTH_SHORT).show();
                 }
                 isFirstin = false;
+                setMarker();
+                setUserMapCenter();
             }
         }
     }
@@ -406,6 +477,123 @@ public class MapActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    /**
+     * 数据库相关*/
+    //点击时上传该amrker的位置参数
+    private void PostMarkerLocation(){
+     OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10000, TimeUnit.MILLISECONDS)
+             .build();
+     //创建请求内容
+      Request request = new Request.Builder()
+                .get()
+                .url(url)
+                .build();
+     //用cilent创建请求任务
+        Call Task = okHttpClient.newCall(request);
+     //异步请求
+        Task.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG,"OnFailure"+e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                int code = response.code();
+                Log.d(TAG,"code-->"+code);
+                if(code == HttpURLConnection.HTTP_OK){
+                ResponseBody body = response.body();
+                Log.d(TAG,"body-->"+body.toString());
+            }}
+        });
+    }
+    //传递现在位置的经纬度
+    private void PostInsLoc(){
+        //设置cilent
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(10000,TimeUnit.MILLISECONDS)
+                .build();
+
+        String jsonstr =
+        MediaType mediaType = new MediaType.parse("application/json");
+
+        RequestBody requestBody = new RequestBody.create();
+        Request request = new Request.Builder()
+                .post(requestBody)
+                .url(url)
+                .build();
+
+        Call task = client.newCall(request);
+        task.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG,"OnFailure-->" +e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                int code = response.code();
+                Log.d(TAG,"OnFailure-->" +code);
+                if(code ==HttpURLConnection.HTTP_OK){
+                    ResponseBody body =response.body();
+                    if(body!=null){
+                        Log.d(TAG,"result-->" +body.string());
+                    }
+                }
+
+            }
+        });
+    }
+
+
+
+    //下载处于定位位置一定范围内的MARKER的位置并且存入MarkerGroup
+    private void GetMarkerLocation(){
+        PostInsLoc();//上传现在的实时位置经纬度
+        Map<String,String>map = new HashMap<>();
+        map.put("cx","120");
+        map.put("cy","30");
+        OkHttpManager.getInstance().sendComplexFrom("http://47.112.174.246：3389/getMessage", map, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.w("posterror",e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String res = response.toString();
+                Log.d("response",res);
+                Log.d("baby",response.body().string());
+            }
+        });
+        ArrayList<Integer> markerarrayListlong = new ArrayList<Integer>();
+        ArrayList<Integer> markerarrayListlan = new ArrayList<Integer>();
+        String sql = "'SELECT * FROM ... WHERE '+langtitude +'>= 80 AND '+longtitude '>=80;";
+        //ArrayList<Pair<Integer,Integer>>markerlist = new  ArrayList<Pair<Integer,Integer>>();
+        int k =0;
+        while(k<4){
+            //markerlist.add((int)mLatitude,(Integer)mLongtitude);
+            markerarrayListlan.add((int)mLatitude);
+            markerarrayListlong.add((int)mLongtitude);
+            for (int i=0;i<=markerarrayListlan.size();i++)
+            {
+                double longti=0,lati=0;
+                LatLng point = new LatLng(markerarrayListlan.get(i),markerarrayListlong.get(i));
+                BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.icon);
+                //构建MarkerOption，用于在地图上添加Marker
+                OverlayOptions options= new MarkerOptions().position(point).icon(bitmap).visible(true).flat(true);
+                //在地图上添加Marker，并显示
+                marker = (Marker)mBaiduMap.addOverlay(options);
+            }
+            k++;
+
+
+
+        SetMarkerGroup();
+    }
+
 
 /*private class PostUtils {
     public  static String LOGIN_URL = "http://172.16.2.54:8080/HttpTest/ServletForPost";
@@ -520,74 +708,87 @@ public class MapActivity extends AppCompatActivity {
     };}*/
 
 
-private void MarkerSet() {
-    //mLastLocationData传入数据库
-    LatLng mlocationdata = new LatLng(mLongtitude, mLatitude);
-    new Thread() {
-        @Override
-        public void run() {
-            MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
-            String requestBodyo = String.valueOf ((int)mLongtitude);
-            Request request = new Request.Builder()
-                    .url("https://api.github.com/markdown/raw")
-                    .post(RequestBody.create(mediaType, requestBodyo))
-                    .build();
-            OkHttpClient okHttpClient = new OkHttpClient();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Log.d(TAG, "onFailure: " + e.getMessage());
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    //Log.d(TAG, response.protocol() + " " + response.code() + " " + response.message());
-                    Headers headers = response.headers();
-                    for (int i = 0; i < headers.size(); i++) {
-                        Log.d(TAG, headers.name(i) + ":" + headers.value(i));
-                    }
-                    Log.d(TAG, "onResponse: " + response.body().string());
-                }
-            });
-            Map<String,String>map = new HashMap<>();
-            map.put("cx","120；");
-            map.put("cy","30");
-
-        }
-};
-
-    //数据库返回对应的在范围内的点
-    ArrayList<Integer> markerarrayListlong = new ArrayList<Integer>();
-    ArrayList<Integer> markerarrayListlan = new ArrayList<Integer>();
-    String sql = "'SELECT * FROM ... WHERE '+langtitude +'>= 80 AND '+longtitude '>=80;";
-    //ArrayList<Pair<Integer,Integer>>markerlist = new  ArrayList<Pair<Integer,Integer>>();
-    int k =0;
-    while(k<4){
-        //markerlist.add((int)mLatitude,(Integer)mLongtitude);
-        markerarrayListlan.add((int)mLatitude);
-        markerarrayListlong.add((int)mLongtitude);
-        for (int i=0;i<=markerarrayListlan.size();i++)
-        {
-            double longti=0,lati=0;
-            LatLng point = new LatLng(markerarrayListlan.get(i),markerarrayListlong.get(i));
-            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.icon);
-            //构建MarkerOption，用于在地图上添加Marker
-            OverlayOptions options= new MarkerOptions().position(point).icon(bitmap).visible(true).flat(true);
-            //在地图上添加Marker，并显示
-            marker = (Marker)mBaiduMap.addOverlay(options);
-        }
-        k++;
-    }
-
-    //为所有marker设置点击事件
-    mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
-        @Override
-        public boolean onMarkerClick(Marker marker) {
-            Toast.makeText(MapActivity.this,"点击了marker",Toast.LENGTH_SHORT).show();
-            return false;
-        }
-    });
-}
-}
+//private void MarkerSet() {
+//    //mLastLocationData传入数据库
+//    LatLng mlocationdata = new LatLng(mLongtitude, mLatitude);
+//    new Thread() {
+//        @Override
+//        public void run() {
+//            MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
+//            String requestBodyo = String.valueOf ((int)mLongtitude);
+//            Request request = new Request.Builder()
+//                    .url("https://api.github.com/markdown/raw")
+//                    .post(RequestBody.create(mediaType, requestBodyo))
+//                    .build();
+//            OkHttpClient okHttpClient = new OkHttpClient();
+//            okHttpClient.newCall(request).enqueue(new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    Log.d(TAG, "onFailure: " + e.getMessage());
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    //Log.d(TAG, response.protocol() + " " + response.code() + " " + response.message());
+//                    Headers headers = response.headers();
+//                    for (int i = 0; i < headers.size(); i++) {
+//                    Log.d(TAG, headers.name(i) + ":" + headers.value(i));
+//                    }
+//                    Log.d(TAG, "onResponse: " + response.body().string());
+//                }
+//            });
+//            Map<String,String>map = new HashMap<>();
+//            map.put("cx","120；");
+//            map.put("cy","30");
+//            OkHttpManager.getInstance().sendComplexFrom("http://47.112.174.246：3389/getMessage", map, new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    Log.w("posterror",e.getMessage());
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                String res = response.toString();
+//                Log.d("response",res);
+//                Log.d("baby",response.body().string());
+//                }
+//            });
+//
+//        }
+//};
+//
+//    //数据库返回对应的在范围内的点
+//    ArrayList<Integer> markerarrayListlong = new ArrayList<Integer>();
+//    ArrayList<Integer> markerarrayListlan = new ArrayList<Integer>();
+//    String sql = "'SELECT * FROM ... WHERE '+langtitude +'>= 80 AND '+longtitude '>=80;";
+//    //ArrayList<Pair<Integer,Integer>>markerlist = new  ArrayList<Pair<Integer,Integer>>();
+//    int k =0;
+//    while(k<4){
+//        //markerlist.add((int)mLatitude,(Integer)mLongtitude);
+//        markerarrayListlan.add((int)mLatitude);
+//        markerarrayListlong.add((int)mLongtitude);
+//        for (int i=0;i<=markerarrayListlan.size();i++)
+//        {
+//            double longti=0,lati=0;
+//            LatLng point = new LatLng(markerarrayListlan.get(i),markerarrayListlong.get(i));
+//            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.icon);
+//            //构建MarkerOption，用于在地图上添加Marker
+//            OverlayOptions options= new MarkerOptions().position(point).icon(bitmap).visible(true).flat(true);
+//            //在地图上添加Marker，并显示
+//            marker = (Marker)mBaiduMap.addOverlay(options);
+//        }
+//        k++;
+//    }
+//
+//    //为所有marker设置点击事件
+//    mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+//        @Override
+//        public boolean onMarkerClick(Marker marker) {
+//            Toast.makeText(MapActivity.this,"点击了marker",Toast.LENGTH_SHORT).show();
+//            return false;
+//        }
+//    });
+//}
+}}
 
 
