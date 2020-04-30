@@ -154,12 +154,12 @@ public class MapActivity extends AppCompatActivity {
         mBaiduMap = mMapView.getMap();//显示地图
         //初始化位置方法
         initMyLocation();
-        GetMarkerLocation();
+        //GetMarkerLocation();
         //两个按钮接口
         message_button();
         scan_buttton();
         //底部导航栏设置
-        /*bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
         viewPager = (ViewPager) findViewById(R.id.vp);
@@ -179,7 +179,7 @@ public class MapActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
 
             }
-        });*/
+        });
         /*viewPagerAdapter =new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter = new  ViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(viewPagerAdapter);
@@ -197,8 +197,8 @@ public class MapActivity extends AppCompatActivity {
     }
 
     //底部导航栏
-    /*private void NavigationView(){
-    public OnNavigationItemSelectedListener onNavigationItemSelectedListener
+    private void NavigationView(){
+        OnNavigationItemSelectedListener onNavigationItemSelectedListener
             = new OnNavigationItemSelectedListener() {
         @Override
         //底部导航栏切换界面
@@ -222,7 +222,7 @@ public class MapActivity extends AppCompatActivity {
             }
             return false;
         }
-    };}*/
+    };}
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -310,7 +310,7 @@ public class MapActivity extends AppCompatActivity {
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                PostMarkerLocation();
+                //PostMarkerLocation();
                 Toast.makeText(MapActivity.this,"点击了MARKER",Toast.LENGTH_SHORT);
                 return false;
             }
@@ -481,6 +481,7 @@ public class MapActivity extends AppCompatActivity {
 
     /**
      * 数据库相关*/
+    /*
     //点击时上传该amrker的位置参数
     private void PostMarkerLocation(){
      OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10000, TimeUnit.MILLISECONDS)
@@ -788,7 +789,7 @@ public class MapActivity extends AppCompatActivity {
 //            return false;
 //        }
 //    });
-//}
-}}
+//}*/
+}
 
 
