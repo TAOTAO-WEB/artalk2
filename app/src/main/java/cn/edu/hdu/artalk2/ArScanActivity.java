@@ -62,6 +62,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import cn.edu.hdu.artalk2.dto.Message;
+import cn.edu.hdu.artalk2.eventSource.MessageListUpdateListener;
+import cn.edu.hdu.artalk2.eventSource.Messages;
 import cn.edu.hdu.artalk2.service.GetMessageListService;
 import cn.edu.hdu.artalk2.utils.ArUtils;
 import cn.edu.hdu.artalk2.utils.OkHttpManager;
@@ -97,8 +99,9 @@ public class ArScanActivity extends AppCompatActivity {
 
   /*网络请求相关变量*/
   private static final String POST_COORDINATE_URL = "http://47.112.174.246:3389/getMessage/";
-  // 返回的message列表
-  private List<Message> messageList;
+
+  // message列表
+  private Messages messages=new Messages();
 
   private static final String TAG = "ArScanActivity";
   /**
@@ -136,7 +139,8 @@ public class ArScanActivity extends AppCompatActivity {
       map.put("Cy",String.valueOf(Math.round(longitude)));
 //    map.put("mId","10");
 
-      OkHttpManager.getInstance().sendComplexFrom("http://47.112.174.246:3389/getMessage/", map,new Callback() {
+      // 发送获取消息列表请求
+      OkHttpManager.getInstance().sendComplexFrom(POST_COORDINATE_URL, map,new Callback() {
         @Override
         public void onFailure(Call call, IOException e) {
           Log.e("posterror",e.getMessage());
@@ -151,7 +155,9 @@ public class ArScanActivity extends AppCompatActivity {
 
           ObjectMapper mapper = new ObjectMapper();
 
-          messageList = mapper.readValue(res, new TypeReference<List<Message>>(){});
+          List<Message> messageList = mapper.readValue(res, new TypeReference<List<Message>>(){});
+
+          messages.setMessageList(messageList);
 
           Log.d("messageList",messageList.toString());
 
@@ -178,6 +184,8 @@ public class ArScanActivity extends AppCompatActivity {
       mBound = false;
     }
   };
+
+
   @Override
   @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
   // CompletableFuture requires api level 24
@@ -189,6 +197,15 @@ public class ArScanActivity extends AppCompatActivity {
       return;
     }
 
+    messages.setListUpdateListener(new MessageListUpdateListener() {
+      @Override
+      public void onUpdate(List<Message> list) {
+        if (list !=null){
+          Log.d(TAG,"监听到数据有变化...");
+//          displayAr();
+        }
+      }
+    });
     // 开启定位
     locationStart();
 
@@ -205,96 +222,102 @@ public class ArScanActivity extends AppCompatActivity {
         startActivity(intent);
       }
     });
+  }
 
+  /**
+   * AR 留言卡片的展示
+   */
+  private void displayAr() {
 
     // Build a renderable from a 2D View.
     CompletableFuture<ViewRenderable> audioCardStage =
             ViewRenderable.builder().setView(this, R.layout.audio_card).build();
     CompletableFuture.allOf(
             audioCardStage)
-        .handle(
-            (notUsed, throwable) -> {
-              // When you build a Renderable, Sceneform loads its resources in the background while
-              // returning a CompletableFuture. Call handle(), thenAccept(), or check isDone()
-              // before calling get().
+            .handle(
+                    (notUsed, throwable) -> {
+                      // When you build a Renderable, Sceneform loads its resources in the background while
+                      // returning a CompletableFuture. Call handle(), thenAccept(), or check isDone()
+                      // before calling get().
 
-              if (throwable != null) {
-                ArUtils.displayError(this, "Unable to load renderable", throwable);
-                return null;
-              }
+                      if (throwable != null) {
+                        ArUtils.displayError(this, "Unable to load renderable", throwable);
+                        return null;
+                      }
 
-              try {
-                audioCardRenderable = audioCardStage.get();
-                // Everything finished loading successfully.
-                hasFinishedLoading = true;
+                      try {
+                        audioCardRenderable = audioCardStage.get();
+                        // Everything finished loading successfully.
+                        hasFinishedLoading = true;
 
-              } catch (InterruptedException | ExecutionException ex) {
-                ArUtils.displayError(this, "Unable to load renderable", ex);
-              }
+                      } catch (InterruptedException | ExecutionException ex) {
+                        ArUtils.displayError(this, "Unable to load renderable", ex);
+                      }
 
-              return null;
-            });
+                      return null;
+                    });
 
     // Set up a tap gesture detector.
     gestureDetector =
-        new GestureDetector(
-            this,
-            new GestureDetector.SimpleOnGestureListener() {
-              @Override
-              public boolean onSingleTapUp(MotionEvent e) {
-                onSingleTap(e);
-                return true;
-              }
+            new GestureDetector(
+                    this,
+                    new GestureDetector.SimpleOnGestureListener() {
+                      @Override
+                      public boolean onSingleTapUp(MotionEvent e) {
+                        onSingleTap(e);
+                        return true;
+                      }
 
-              @Override
-              public boolean onDown(MotionEvent e) {
-                return true;
-              }
-            });
+                      @Override
+                      public boolean onDown(MotionEvent e) {
+                        return true;
+                      }
+                    });
 
     // Set a touch listener on the Scene to listen for taps.
     arSceneView
-        .getScene()
-        .setOnTouchListener(
-            (HitTestResult hitTestResult, MotionEvent event) -> {
-              // If the solar system hasn't been placed yet, detect a tap and then check to see if
-              // the tap occurred on an ARCore plane to place the solar system.
-              if (!hasPlacedSolarSystem) {
-                return gestureDetector.onTouchEvent(event);
-              }
+            .getScene()
+            .setOnTouchListener(
+                    (HitTestResult hitTestResult, MotionEvent event) -> {
+                      // If the solar system hasn't been placed yet, detect a tap and then check to see if
+                      // the tap occurred on an ARCore plane to place the solar system.
+                      if (!hasPlacedSolarSystem) {
+                        return gestureDetector.onTouchEvent(event);
+                      }
 
-              // Otherwise return false so that the touch event can propagate to the scene.
-              return false;
-            });
+                      // Otherwise return false so that the touch event can propagate to the scene.
+                      return false;
+                    });
 
     // Set an update listener on the Scene that will hide the loading message once a Plane is
     // detected.
     arSceneView
-        .getScene()
-        .addOnUpdateListener(
-            frameTime -> {
-              if (loadingMessageSnackbar == null) {
-                return;
-              }
+            .getScene()
+            .addOnUpdateListener(
+                    frameTime -> {
+                      if (loadingMessageSnackbar == null) {
+                        return;
+                      }
 
-              Frame frame = arSceneView.getArFrame();
-              if (frame == null) {
-                return;
-              }
+                      Frame frame = arSceneView.getArFrame();
+                      if (frame == null) {
+                        return;
+                      }
 
-              if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
-                return;
-              }
+                      if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
+                        return;
+                      }
 
-              for (Plane plane : frame.getUpdatedTrackables(Plane.class)) {
-                if (plane.getTrackingState() == TrackingState.TRACKING) {
-                  hideLoadingMessage();
-                }
-              }
-            });
+                      for (Plane plane : frame.getUpdatedTrackables(Plane.class)) {
+                        if (plane.getTrackingState() == TrackingState.TRACKING) {
+                          hideLoadingMessage();
+                        }
+                      }
+                    });
 
     // Lastly request CAMERA permission which is required by ARCore.
     ArUtils.requestCameraPermission(this, RC_PERMISSIONS);
+
   }
 
 
