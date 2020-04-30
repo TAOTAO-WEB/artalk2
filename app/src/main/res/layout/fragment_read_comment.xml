@@ -105,11 +105,13 @@
         app:layout_constraintStart_toEndOf="@+id/readcmzancopy" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="68dp"
+        android:id="@+id/readcmcontent"
+        android:layout_width="260dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="30dp"
         android:layout_marginTop="200dp"
-        android:text="XXXXXXXXXXXXXX"
+        android:text="---"
+        android:autoSizeTextType="uniform"
         app:layout_constraintStart_toStartOf="@+id/readcmback"
         app:layout_constraintTop_toTopOf="@+id/readcmback" />
 

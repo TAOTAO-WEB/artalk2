@@ -68,23 +68,25 @@
         app:layout_constraintStart_toStartOf="@+id/readback"
         app:layout_constraintTop_toTopOf="@+id/readback" />
     <!--留言内容-->
+    <!--点赞数量-->
     <TextView
         android:id="@+id/readcontent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="28dp"
-        android:text="XXXXXXXXXX"
+        android:layout_width="260dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:autoSizeTextType="uniform"
+        android:text="-----"
         app:layout_constraintStart_toStartOf="@+id/readback"
         app:layout_constraintTop_toBottomOf="@+id/readtitle" />
-    <!--点赞数量-->
+
     <TextView
         android:id="@+id/readzannum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="200dp"
-        android:text="XX"
+        android:text="--"
         app:layout_constraintBottom_toBottomOf="@+id/readback"
         app:layout_constraintEnd_toStartOf="@+id/readzancopy"
         app:layout_constraintHorizontal_bias="0.416"
@@ -97,7 +99,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="200dp"
-        android:text="XX"
+        android:text="--"
         app:layout_constraintBottom_toBottomOf="@+id/readback"
         app:layout_constraintStart_toEndOf="@+id/readzancopy" />
 
@@ -122,6 +124,40 @@
         android:src="@drawable/readpause"
         app:layout_constraintBottom_toBottomOf="@+id/readback"
         app:layout_constraintStart_toStartOf="@+id/readback" />
+
+    <SeekBar
+        android:id="@+id/readmis"
+        android:layout_width="0dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/readback"
+        app:layout_constraintEnd_toEndOf="@+id/readback"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/readback"
+        app:layout_constraintTop_toTopOf="@+id/readback" />
+
+    <TextView
+        android:id="@+id/curtime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        app:layout_constraintBottom_toBottomOf="@+id/readback"
+        app:layout_constraintEnd_toStartOf="@+id/readback"
+        app:layout_constraintHorizontal_bias="0.411"
+        app:layout_constraintStart_toStartOf="@id/readmis"
+        app:layout_constraintTop_toTopOf="@+id/readback" />
+
+    <TextView
+        android:id="@+id/endtime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        app:layout_constraintBottom_toBottomOf="@+id/readback"
+        app:layout_constraintEnd_toEndOf="@+id/readback"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/readmis"
+        app:layout_constraintTop_toTopOf="@+id/readback" />
 
 
 </android.support.constraint.ConstraintLayout>
