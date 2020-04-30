@@ -159,7 +159,7 @@ public class MapActivity extends AppCompatActivity {
         message_button();
         scan_buttton();
         //底部导航栏设置
-        bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
+        /*bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_view);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
         viewPager = (ViewPager) findViewById(R.id.vp);
@@ -179,7 +179,7 @@ public class MapActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
 
             }
-        });
+        });*/
         /*viewPagerAdapter =new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter = new  ViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(viewPagerAdapter);
@@ -197,8 +197,8 @@ public class MapActivity extends AppCompatActivity {
     }
 
     //底部导航栏
-    private void NavigationView(){
-        OnNavigationItemSelectedListener onNavigationItemSelectedListener
+    /*private void NavigationView(){
+     public OnNavigationItemSelectedListener onNavigationItemSelectedListener
             = new OnNavigationItemSelectedListener() {
         @Override
         //底部导航栏切换界面
@@ -222,7 +222,7 @@ public class MapActivity extends AppCompatActivity {
             }
             return false;
         }
-    };}
+    };}*/
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
