@@ -5,41 +5,44 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ReadCommentFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ReadCommentFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    //控件
+    private TextView cmtime;              //评论时间
+    private ImageView cmzan_btn;          //赞按钮
+    private ImageView cmzancopy_btn;      //踩按钮
+    private TextView cmzannum;            //赞数量
+    private TextView cmzancopynum;        //踩数量
+    private TextView cmusername;          //评论的用户名
+    private TextView cmcontent;           //评论内容
+
+
+    //传入参数
+    private String datetime;              //时间
+    private String strcmcontent;          //评论内容
+    private Integer strzannum;            //赞数量
+    private Integer strcainum;            //踩数量
+    private String struser;               //用户名
+
 
     public ReadCommentFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ReadCommentFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ReadCommentFragment newInstance(String param1, String param2) {
+
+    public static ReadCommentFragment newInstance(String datetime, String strcmcontent,
+                                                  Integer strzannum,Integer strcainum,String struser) {
         ReadCommentFragment fragment = new ReadCommentFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString("datetime", datetime);
+        args.putString("strcmcontent", strcmcontent);
+        args.putInt("strzannum",strzannum);
+        args.putInt("strcainum",strcainum);
+        args.putString("struser",struser);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,15 +51,33 @@ public class ReadCommentFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            datetime = getArguments().getString("datetime");
+            strcmcontent = getArguments().getString("strcmcontent");
+            strcainum = getArguments().getInt("strcainum");
+            strzannum = getArguments().getInt("strzannum");
+            struser = getArguments().getString("struser");
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_read_comment, container, false);
+        cmtime = view.findViewById(R.id.readcmtime);
+        cmzan_btn = view.findViewById(R.id.readcmzan);
+        cmzancopy_btn = view.findViewById(R.id.readcmzancopy);
+        cmzannum = view.findViewById(R.id.readcmzannum);
+        cmzancopynum = view.findViewById(R.id.readcmcainum);
+        cmcontent = view.findViewById(R.id.readcmcontent);
+        cmusername = view.findViewById(R.id.readcmuser);
+
+        //设置参数
+        cmtime.setText(datetime);
+        cmzannum.setText(String.valueOf(strzannum));
+        cmzancopynum.setText(String.valueOf(strcainum));
+        cmcontent.setText(strcmcontent);
+        cmusername.setText(struser);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_read_comment, container, false);
+        return view;
     }
 }
