@@ -113,8 +113,8 @@ public class ReadActivity extends AppCompatActivity {
 
         //post参数
         Map<String,String> map = new HashMap<>();
-        //map.put("mId",msgid);
-        map.put("mId","29");
+        map.put("mId",msgid);
+//        map.put("mId","29");
 
         Callback callback = new Callback() {
             @Override

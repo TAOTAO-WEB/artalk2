@@ -71,15 +71,15 @@
 
 
         <activity android:name=".ReadActivity" >
+
+        </activity>
+        <activity android:name=".MapActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".MapActivity"
-            android:theme="@style/Theme.Design.Light.NoActionBar">
-
         </activity>
         <activity android:name=".ArScanActivity"
             android:configChanges="orientation|screenSize"
