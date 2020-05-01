@@ -103,14 +103,20 @@ import static com.baidu.location.h.l.v;
 //主界面
 public class MapActivity extends AppCompatActivity {
 
-    /**地图相关*/
+    /**
+     * 地图相关
+     */
     private MapView mMapView = null;
     private BaiduMap mBaiduMap = null;
     private Context context;
-    /**两个按钮*/
+    /**
+     * 两个按钮
+     */
     private ImageButton message_button = null;
     private ImageButton scan_button = null;
-    /**定位相关*/
+    /**
+     * 定位相关
+     */
     private double mLatitude;
     private double mLongtitude;
     private LocationClient mLocationClient;
@@ -119,20 +125,26 @@ public class MapActivity extends AppCompatActivity {
     private boolean isFirstin = true;
     double Lat = 0;
     double Lon = 0;
-    /**方向传感器*/
+    /**
+     * 方向传感器
+     */
     private MyOrientationListener mMyOrientationListener;
     private float mCurrentX;
     //自定义图标
     private BitmapDescriptor mIconLocation;
-   /**导航栏相关*/
+    /**
+     * 导航栏相关
+     */
     private BottomNavigationView bottomNavigationView;
     private ViewPager viewPagerAdapter;
     private ViewPager viewPager;
     private MenuItem menuItem;
-    /**okhttp相关*/
+    /**
+     * okhttp相关
+     */
     String location, id;
     public static final String url = "http://47.112.174.246:3389/getMessage";
-    public static final String TAG="MapActivity";
+    public static final String TAG = "MapActivity";
 
 
     @Override
@@ -251,14 +263,15 @@ public class MapActivity extends AppCompatActivity {
     };
 
     /**
-     * marker相关*/
+     * marker相关
+     */
 
     //添加单个marker
     private void setMarker() {
-        Log.v("pcw","setMarker : lat : "+ Lat+" lon : " + Lon);
+        Log.v("pcw", "setMarker : lat : " + Lat + " lon : " + Lon);
         //定义Maker坐标点
         Lat = 40.8073029300;
-        Lon= 114.8804802800;
+        Lon = 114.8804802800;
         LatLng point = new LatLng(Lat, Lon);
         //构建Marker图标
         BitmapDescriptor bitmap = BitmapDescriptorFactory
@@ -283,8 +296,8 @@ public class MapActivity extends AppCompatActivity {
 
     //刷新将定位点置于屏幕中央
     private void setUserMapCenter() {
-        Log.v("pcw","setUserMapCenter : lat : "+ mLatitude+" lon : " + mLongtitude);
-        LatLng cenpt = new LatLng(mLatitude,mLongtitude);
+        Log.v("pcw", "setUserMapCenter : lat : " + mLatitude + " lon : " + mLongtitude);
+        LatLng cenpt = new LatLng(mLatitude, mLongtitude);
 //定义地图状态
         MapStatus mMapStatus = new MapStatus.Builder()
                 .target(cenpt)
@@ -297,28 +310,27 @@ public class MapActivity extends AppCompatActivity {
     }
 
     //添加多个marker
-    private void SetMarkerGroup(){
-
-
+    private void SetMarkerGroup() {
 
 
         MarkerClick();
 
     }
+
     //设置单击事件
-    private void MarkerClick(){
+    private void MarkerClick() {
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 //PostMarkerLocation();
-                Toast.makeText(MapActivity.this,"点击了MARKER",Toast.LENGTH_SHORT);
+                Toast.makeText(MapActivity.this, "点击了MARKER", Toast.LENGTH_SHORT);
                 return false;
             }
         });
     }
 
     /**
-       *关于地图图层生命周期的五个方法
+     * 关于地图图层生命周期的五个方法
      */
     protected void onStart() {
         super.onStart();
@@ -329,16 +341,19 @@ public class MapActivity extends AppCompatActivity {
         //开启方向传感器
         mMyOrientationListener.start();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         mMapView.onResume();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
         mMapView.onPause();
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -348,6 +363,7 @@ public class MapActivity extends AppCompatActivity {
         //停止方向传感器
         mMyOrientationListener.stop();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -358,38 +374,41 @@ public class MapActivity extends AppCompatActivity {
     }
 
     /**
-    *按钮响应*/
+     * 按钮响应
+     */
     // 点击信息跳转
     private void message_button() {
         //按钮
-        ImageButton message_button = (ImageButton)findViewById(R.id.message_button);
+        ImageButton message_button = (ImageButton) findViewById(R.id.message_button);
 //        //按钮处理
         message_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MapActivity.this,"点击跳转到消息界面",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapActivity.this, "点击跳转到消息界面", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
     //点击扫描跳转
-    public void scan_buttton(){
-        ImageButton scan_button = (ImageButton)findViewById(R.id.scan_button);
+    public void scan_buttton() {
+        ImageButton scan_button = (ImageButton) findViewById(R.id.scan_button);
         scan_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MapActivity.this,"点击跳转到扫描界面",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapActivity.this, "点击跳转到扫描界面", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
 
     /**
-     * 定位*/
+     * 定位
+     */
     private class MyLocationListener extends BDAbstractLocationListener {
         @Override
         public void onReceiveLocation(BDLocation location) {
             //mapView 销毁后不在处理新接收的位置
-            if (location == null || mMapView == null){
+            if (location == null || mMapView == null) {
                 return;
             }
             MyLocationData locData = new MyLocationData.Builder()
@@ -413,13 +432,13 @@ public class MapActivity extends AppCompatActivity {
 
                 if (location.getLocType() == BDLocation.TypeGpsLocation) {
                     // GPS定位结果
-                    Toast.makeText(context, "定位:"+location.getAddrStr(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "定位:" + location.getAddrStr(), Toast.LENGTH_SHORT).show();
                 } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {
                     // 网络定位结果
-                    Toast.makeText(context, "定位:"+location.getAddrStr(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "定位:" + location.getAddrStr(), Toast.LENGTH_SHORT).show();
                 } else if (location.getLocType() == BDLocation.TypeOffLineLocation) {
                     // 离线定位结果
-                    Toast.makeText(context, "定位:"+location.getAddrStr(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "定位:" + location.getAddrStr(), Toast.LENGTH_SHORT).show();
                 } else if (location.getLocType() == BDLocation.TypeServerError) {
                     Toast.makeText(context, "定位:服务器错误", Toast.LENGTH_SHORT).show();
                 } else if (location.getLocType() == BDLocation.TypeNetWorkException) {
@@ -433,6 +452,7 @@ public class MapActivity extends AppCompatActivity {
             }
         }
     }
+
     //初始化定位
     private void initMyLocation() {
         //缩放地图
@@ -459,6 +479,7 @@ public class MapActivity extends AppCompatActivity {
         //开始定位
         mLocationClient.start();
     }
+
     //回到定位中心
     private void centerToMyLocation(double latitude, double longtitude) {
         mBaiduMap.clear();
@@ -466,6 +487,7 @@ public class MapActivity extends AppCompatActivity {
         MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(mLastLocationData);
         mBaiduMap.animateMapStatus(msu);
     }
+
     //传感器
     private void initOrientation() {
         //传感器
@@ -477,6 +499,7 @@ public class MapActivity extends AppCompatActivity {
             }
         });
     }
+}
 
 
     /**
@@ -789,7 +812,8 @@ public class MapActivity extends AppCompatActivity {
 //            return false;
 //        }
 //    });
+//}
+//}
 //}*/
-}
 
 
