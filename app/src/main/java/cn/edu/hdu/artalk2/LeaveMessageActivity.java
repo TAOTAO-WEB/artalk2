@@ -2,6 +2,7 @@ package cn.edu.hdu.artalk2;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -10,7 +11,9 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.renderscript.Sampler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,14 +24,19 @@ import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
+import cn.edu.hdu.artalk2.utils.OkHttpManager;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -61,6 +69,10 @@ public class LeaveMessageActivity extends AppCompatActivity {
 
     //播放功能
     private MediaPlayer mp = null;
+    private SeekBar seekBar;
+    private TextView tv_CTIME;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +86,8 @@ public class LeaveMessageActivity extends AppCompatActivity {
         lm_et = findViewById(R.id.lm_et);
         lm_start = findViewById(R.id.lm_start);
         bt_submit = findViewById(R.id.bt_submit);
+        seekBar=findViewById(R.id.play);
+        tv_CTIME=findViewById(R.id.tv_cur_time);
 
 
         //显示时间
@@ -127,7 +141,11 @@ public class LeaveMessageActivity extends AppCompatActivity {
                         //lm_time.setText("录音完毕");
                         lm_mic.setImageDrawable(getResources().getDrawable(R.drawable.leavemessage_mic_finitsh));
                         isStart = false;
+
                         lm_start.setVisibility(View.VISIBLE);
+                        seekBar.setVisibility(View.VISIBLE);
+                        tv_CTIME.setVisibility(View.VISIBLE);
+
                         isRecording = false;
                         isRecorded = true;
                         break;
@@ -135,6 +153,27 @@ public class LeaveMessageActivity extends AppCompatActivity {
                         break;
                 }
                 return false;
+            }
+        });
+
+        //进度条监听
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                //参数b表示是否为用户手动操作
+                if(b){
+                    mp.seekTo(i);   //用户手动调进度
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
         //试听
@@ -147,12 +186,19 @@ public class LeaveMessageActivity extends AppCompatActivity {
                         mp.setDataSource(soundFile.getPath());
                         mp.prepare();
                         isStart = true;
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
                 if (isStart)
                     mp.start();
+                // 设置seekbar的最大值
+                seekBar.setMax(mp.getDuration());
+                // 创建一个线程
+                Thread thread = new Thread(new MuiscThread());
+                // 启动线程
+                thread.start();
             }
         });
         //提交
@@ -188,85 +234,70 @@ public class LeaveMessageActivity extends AppCompatActivity {
                     if (location==null)
                         Toast.makeText(getApplicationContext(), "无法从GPS中获取当前定位信息", Toast.LENGTH_SHORT).show();
 
-                    String postUrl = "http://47.112.174.246:3389/create/Voice/";
-                    //创建okHttpClient对象
-                    OkHttpClient mOkHttpClient = new OkHttpClient();
-                    if (isRecorded){
+                    int l_lat= (int) location.getLatitude();
+                    int l_long= (int) location.getLongitude();
+                    String postUrl = "http://47.112.174.246:3389/createMessage/";
+
+                 //  if (isRecorded){
                     RequestBody requestBody=RequestBody.create(MediaType.parse("application/octet-stream"),soundFile);//创建requestBody对象
                     MultipartBody multipartBody=new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
-                            .addFormDataPart("msg_sound",String.valueOf(soundFile),requestBody)
-                            .addFormDataPart("userid","1")
-                            .addFormDataPart("msgid", String.valueOf(System.currentTimeMillis()))
-                            .addFormDataPart("msg_text", String.valueOf(lm_et.getText()))
-                            .addFormDataPart("msglatitude", String.valueOf(location.getLatitude()))
-                            .addFormDataPart("msglongitude", String.valueOf(location.getLongitude()))
-
+                            .addFormDataPart("userId","1")
+                            .addFormDataPart("Voice",String.valueOf(soundFile),requestBody)
+                            .addFormDataPart("text", String.valueOf(lm_et.getText()))
+                            .addFormDataPart("cx", String.valueOf(l_lat))
+                            .addFormDataPart("cy", String.valueOf(l_long))
                             .build();
-                    //RequestBody formBody = new MultipartBody().Builder();
-//                            .add("msgid", String.valueOf(System.currentTimeMillis()))//add里面是传入post请求的map值 前面为key后面为vue
-//                            .add("msg_sound", String.valueOf(soundFile))//留言存放路径
-//                            .add("msg_text", String.valueOf(lm_et.getText()))//文字留言内容
-//                            .add("msglatitude", String.valueOf(location.getLatitude()))//
-//                            .add("msglongitude", String.valueOf(location.getLongitude()))//
-//                            .add("userid","1")//留言用户ID
+//
+//                    Request request= new Request.Builder()
+//                            .url(postUrl)//TODO
+//                            .post(multipartBody)
 //                            .build();
 
-                    Request request= new Request.Builder()
-                            .url(postUrl)//TODO
-                            .post(multipartBody)
-                            .build();
-
-                    mOkHttpClient.newCall(request).enqueue(new Callback(){
+                    Callback callback=new Callback(){
                                 @Override
                                 public void onFailure(Call call, IOException e) {
                                     Log.i(TAG, "onFailure: 失败");
-                                    Toast.makeText(getApplicationContext(), "失败", Toast.LENGTH_SHORT).show();
+                                  //  Toast.makeText(getApplicationContext(), "失败", Toast.LENGTH_SHORT).show();
                                     e.printStackTrace();
                                 }
 
                                 @Override
                                 public void onResponse(Call call, Response response) throws IOException {
-                                    Log.i(TAG, "onResponse: 成功 " + response.body().string());
-                                  //  Toast.makeText(getApplicationContext(), "成功", Toast.LENGTH_SHORT).show();
+                                    Message message=Message.obtain();
+                                    message.what=1;
+                                    message.obj=response.body().string();
+                                    String msId = null;
+                                    String jsonData = (String)message.obj;
+                                    JSONObject jsonObject= null;
+                                    try {
+                                        jsonObject = new JSONObject(jsonData);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        msId = jsonObject.get("msId").toString();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Log.i(TAG, "onResponse: 成功 " + msId+" "+l_lat+" "+l_long);
+                                    Intent intent=new Intent(LeaveMessageActivity.this,MapActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+                                    startActivity(intent);
+//                                    Intent intent=new Intent(LeaveMessageActivity.this,ReadActivity.class);
+////括号内的形式为（当前活动.this，传递给的活动.class）;
+//                                    intent.putExtra("msgid",msId);
+//                                    intent.putExtra("cx",l_lat);
+//                                    intent.putExtra("cy",l_long);
+//                                    intent.putExtra("username","1");
+//
+////这里调用intent的putExtra()方法，括号内的内容是（你传递数据的名称，数据）
+//                                    startActivity(intent);
+////启动传递目标的活动。7
                                 }
-                            });
-                    }
-//                    else {
-//                        RequestBody requestBody=RequestBody.create(MediaType.parse("application/json; charset=utf-8"),"message");//创建requestBody对象
-//                        MultipartBody multipartBody=new MultipartBody.Builder()
-//                                .setType(MultipartBody.FORM)
-//
-//                                .addFormDataPart("msgid", String.valueOf(System.currentTimeMillis()),requestBody)
-//                                .addFormDataPart("userid","1")
-//                                .addFormDataPart("msg_sound",String.valueOf(soundFile))
-//
-//                                .addFormDataPart("msg_text", String.valueOf(lm_et.getText()))
-//                                .addFormDataPart("msglatitude", String.valueOf(location.getLatitude()))
-//                                .addFormDataPart("msglongitude", String.valueOf(location.getLongitude()))
-//
-//                                .build();
-//
-//                        Request request= new Request.Builder()
-//                                .url(postUrl)//TODO
-//                                .post(multipartBody)
-//                                .build();
-//
-//                        mOkHttpClient.newCall(request).enqueue(new Callback(){
-//                            @Override
-//                            public void onFailure(Call call, IOException e) {
-//                                Log.i(TAG, "onFailure: 失败");
-//                                Toast.makeText(getApplicationContext(), "失败", Toast.LENGTH_SHORT).show();
-//                                e.printStackTrace();
-//                            }
-//
-//                            @Override
-//                            public void onResponse(Call call, Response response) throws IOException {
-//                                Log.i(TAG, "onResponse: 成功 " + response.body().string());
-//                                Toast.makeText(getApplicationContext(), "成功"+lm_et.getText(), Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
-//                    }
+                            };
+                    OkHttpManager.getInstance().sendOkHttpResponse(postUrl,multipartBody, callback);
+
 
                 }
             }
@@ -342,7 +373,7 @@ public class LeaveMessageActivity extends AppCompatActivity {
             Message msg = Message.obtain();
             msg.what = TIME_COUNT;
             msg.obj = timeCount;
-            myHandler.handleMessage(msg);
+            RecordHandler.handleMessage(msg);
             try {
                 timeThread.sleep(1000);
             } catch (InterruptedException e) {
@@ -354,7 +385,7 @@ public class LeaveMessageActivity extends AppCompatActivity {
         Message msg = Message.obtain();
         msg.what = TIME_COUNT;
         msg.obj = timeCount;
-        myHandler.sendMessage(msg);
+        RecordHandler.sendMessage(msg);
 
     }
     // 格式化 录音时长为 时:分:秒
@@ -362,11 +393,11 @@ public class LeaveMessageActivity extends AppCompatActivity {
         String hh = miss / 3600 > 9 ? miss / 3600 + "" : "0" + miss / 3600;
         String mm = (miss % 3600) / 60 > 9 ? (miss % 3600) / 60 + "" : "0" + (miss % 3600) / 60;
         String ss = (miss % 3600) % 60 > 9 ? (miss % 3600) % 60 + "" : "0" + (miss % 3600) % 60;
-        return hh + ":" + mm + ":" + ss;
+        return mm + ":" + ss;
     }
 
 
-    Handler myHandler = new Handler() {
+    private Handler RecordHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -374,11 +405,36 @@ public class LeaveMessageActivity extends AppCompatActivity {
                     int count = (int) msg.obj;
                     Log.d(TAG,"count == " + count);
                     lm_time.setText(FormatMiss(count));
-
                     break;
             }
         }
     };
-
+    private Handler PlayHandler= new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            // 将SeekBar位置设置到当前播放位置
+            seekBar.setProgress(msg.what);
+            //获得音乐的当前播放时间
+            tv_CTIME.setText(FormatMiss(msg.what/1000+1));
+        }
+    };
+    class MuiscThread implements Runnable {
+        @Override
+        //实现run方法
+        public void run() {
+            //判断音乐的状态，在不停止与不暂停的情况下向总线程发出信息
+            while (mp != null) {
+                try {
+                    // 每100毫秒更新一次位置
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //发出的信息
+                PlayHandler.sendEmptyMessage(mp.getCurrentPosition());
+            }
+        }
+    }
 
 }

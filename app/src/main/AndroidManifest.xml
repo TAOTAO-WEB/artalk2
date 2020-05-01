@@ -84,27 +84,22 @@
             android:process=":remote">
         </service>
 
-        <activity android:name=".LeaveMessageActivity"/>
-<!--        <activity android:name=".LeaveMessageActivity"-->
-<!--            android:theme="@style/Theme.Design.Light.NoActionBar">-->
-<!--&lt;!&ndash;            <intent-filter>&ndash;&gt;-->
-<!--&lt;!&ndash;                <action android:name="android.intent.action.MAIN" />&ndash;&gt;-->
+        <activity android:name=".LeaveMessageActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
 
-<!--&lt;!&ndash;                <category android:name="android.intent.category.LAUNCHER" />&ndash;&gt;-->
-<!--&lt;!&ndash;            </intent-filter>&ndash;&gt;-->
 
-<!--        </activity>-->
+        </activity>
 
 
         <activity android:name=".ReadActivity" >
         </activity>
         <activity android:name=".MapActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
-<!--            <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
         </activity>
         <activity android:name=".ArScanActivity"
             android:configChanges="orientation|screenSize"

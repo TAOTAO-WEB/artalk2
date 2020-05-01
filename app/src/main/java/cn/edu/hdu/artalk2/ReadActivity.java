@@ -117,11 +117,11 @@ public class ReadActivity extends AppCompatActivity {
         OkHttpManager okHttpManager = OkHttpManager.getInstance();
 
         //接受跨页面传输的值
-        Intent intent = getIntent();
-        String msgid = intent.getStringExtra("msgid");
-        String cx = intent.getStringExtra("cx");
-        String cy = intent.getStringExtra("cy");
-        String username = intent.getStringExtra("username");
+//        Intent intent = getIntent();
+//        String msgid = intent.getStringExtra("msgid");
+//        String cx = intent.getStringExtra("cx");
+//        String cy = intent.getStringExtra("cy");
+//        String username = intent.getStringExtra("username");
         //usertitle.setText(username);
 
         //post参数
