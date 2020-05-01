@@ -91,13 +91,17 @@ public class ArScanActivity extends AppCompatActivity {
   // True once the scene has been placed.
   private boolean hasPlacedSolarSystem = false;
 
+
+  // 是否正在构建ar留言图
+  private boolean isDisplayingAudioCard = false;
+
   LocationClient mLocationClient;
 
   private GetMessageListService mService;
   private boolean mBound = false;
 
 
-  /*网络请求相关变量*/
+  // 请求网址
   private static final String POST_COORDINATE_URL = "http://47.112.174.246:3389/getMessage/";
 
   // message列表
@@ -200,9 +204,15 @@ public class ArScanActivity extends AppCompatActivity {
     messages.setListUpdateListener(new MessageListUpdateListener() {
       @Override
       public void onUpdate(List<Message> list) {
-        if (list !=null){
-          Log.d(TAG,"监听到数据有变化...");
-//          displayAr();
+        if (list.size()!=0 && !isDisplayingAudioCard){
+          isDisplayingAudioCard = true;
+          Log.d(TAG,"监听到有语音留言数据...");
+          displayAr();
+        }
+        // 没有语音数据
+        if (list.size() == 0){
+          Log.d(TAG,"监听到没有语音留言数据...");
+          isDisplayingAudioCard = false;
         }
       }
     });
@@ -474,7 +484,13 @@ public class ArScanActivity extends AppCompatActivity {
     audioCardView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Toast.makeText(ArScanActivity.this,"You touch the card!!",Toast.LENGTH_LONG).show();
+        // 跳转到读取语音界面
+        Log.d(TAG,"你点击了语音条");
+        Message m = messages.getMessageList().get(0);
+
+        Intent intent = new Intent(ArScanActivity.this,ReadActivity.class);
+        intent.putExtra("msgId",m.getMsId());
+        startActivity(intent);
       }
     });
     return base;
