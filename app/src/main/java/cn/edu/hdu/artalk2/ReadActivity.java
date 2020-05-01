@@ -2,13 +2,10 @@ package cn.edu.hdu.artalk2;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -19,13 +16,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +39,8 @@ public class ReadActivity extends AppCompatActivity {
     private TextView usertitle;     //用户名标签
     private ImageView back_btn;     //返回按钮
 
+    private String msgid = "";                   //留言id
+
     private static final String url = "http://47.112.174.246:3389/";
 
     //处理后台传入的数据
@@ -52,24 +51,30 @@ public class ReadActivity extends AppCompatActivity {
             super.handleMessage(msg);
             String jsonData = (String) msg.obj;
             try {
+                //留言页面数据
                 JSONObject jsonObject = new JSONObject(jsonData);
-                String misurl = jsonObject.get("Voice").toString();
-                String likenum = jsonObject.get("likeCount").toString();
-                int commentCount = Integer.parseInt(jsonObject.get("commentCount").toString());
-                String text = jsonObject.get("Text").toString();
+                String misurl = jsonObject.getString("Voice");
+                Integer likenum = jsonObject.getInt("likeCount");
+                Integer dislikeCount = jsonObject.getInt("DislikeCount");
+                String time =  jsonObject.getString("time").substring(0,16);
+                String text = jsonObject.getString("Text");
 
                 List<Fragment> fragments = new ArrayList<>();
                 //留言页面
-                fragments.add(ReadMessageFragment.newInstance(Integer.parseInt(likenum),0,
-                        url+misurl,text,"2020/4/26"));
+                fragments.add(ReadMessageFragment.newInstance(likenum,dislikeCount,
+                        url+misurl,text,time,"29"));
 
                 //评论页面
-                JSONObject commentList = (JSONObject) jsonObject.get("commentList");
-                for (Iterator<String> it = commentList.keys(); it.hasNext(); ) {
-                    String id = it.next();
-                    String com = commentList.getString(id);
-                    fragments.add(ReadCommentFragment.newInstance("2020/4/26",com,
-                            0,0,id));
+                JSONArray commentList = jsonObject.getJSONArray("commentList");
+                for(int i=0;i<commentList.length();i++){
+                    JSONObject comment = commentList.getJSONObject(i);
+                    String cmtext = comment.getString("text");
+                    String cmtime = comment.getString("time").substring(0,16);
+                    Integer cmlikeCount = comment.getInt("likeCount");
+                    Integer cmdisLikeCount = comment.getInt("disLikeCount");
+                    String cmid = comment.getString("cmId");                 //评论id
+                    fragments.add(ReadCommentFragment.newInstance(cmtime,cmtext,cmlikeCount,
+                            cmdisLikeCount,"artalk",cmid));
                 }
                 ReadAdapter adapter = new ReadAdapter(fragments,getSupportFragmentManager());
                 viewPager.setAdapter(adapter);
@@ -84,33 +89,19 @@ public class ReadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_read);
 
-//        /*
-//       隐藏标题栏
-//        */
-//        ActionBar actionBar = getSupportActionBar();
-//        if (actionBar != null) {
-//            actionBar.hide();
-//        }
-//        //隐藏状态栏
-//        if(Build.VERSION.SDK_INT >= 21){
-//            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-//            getWindow().setStatusBarColor(Color.TRANSPARENT);
-//        }
-
         back_btn = findViewById(R.id.readbackbtn);
         com_btn = findViewById(R.id.read_com);
         fav_btn = findViewById(R.id.read_fav);
         usertitle = findViewById(R.id.readuser);
 
         //返回按钮
-//        back_btn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(ReadActivity.this,ArScanActivity.class);
-//                startActivity(intent);
-//            }
-//        });
+        back_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ReadActivity.this,ArScanActivity.class);
+                startActivity(intent);
+            }
+        });
 
         viewPager = findViewById(R.id.readviewpager);
 
@@ -118,17 +109,12 @@ public class ReadActivity extends AppCompatActivity {
 
         //接受跨页面传输的值
         Intent intent = getIntent();
-        String msgid = intent.getStringExtra("msgid");
-        String cx = intent.getStringExtra("cx");
-        String cy = intent.getStringExtra("cy");
-        String username = intent.getStringExtra("username");
-        //usertitle.setText(username);
+        msgid = intent.getStringExtra("msgid");
 
         //post参数
         Map<String,String> map = new HashMap<>();
+        //map.put("mId",msgid);
         map.put("mId","29");
-        map.put("Cx","30");
-        map.put("Cy","30");
 
         Callback callback = new Callback() {
             @Override

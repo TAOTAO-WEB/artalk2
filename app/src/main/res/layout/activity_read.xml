@@ -6,60 +6,61 @@
     android:layout_height="match_parent"
     tools:context=".ReadActivity"
     android:background="@drawable/readbg">
-    <!--返回按钮-->
+
     <ImageView
         android:id="@+id/readbackbtn"
         android:layout_width="140dp"
         android:layout_height="62dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="4dp"
         android:background="@drawable/readback"
         android:src="@drawable/readreturn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <!--收藏按钮-->
+
     <Button
         android:id="@+id/read_fav"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="28dp"
         android:background="@drawable/readbtn"
         android:text="+收藏"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/read_com"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent" />
-    <!--评论按钮-->
+
     <Button
         android:id="@+id/read_com"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="30dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginEnd="28dp"
         android:layout_marginBottom="30dp"
         android:background="@drawable/readbtn"
         android:text="+评论"
-        app:layout_constraintLeft_toRightOf="@+id/read_fav"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <!--用户title-->
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/readviewpager"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <!--便签分页部分-->
+
     <TextView
         android:id="@+id/readuser"
         android:layout_width="184dp"
         android:layout_height="49dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="30dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="36dp"
         android:text="Trump 的 留 言"
         android:textSize="25dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <!--便签分页部分-->
+
     <android.support.v4.view.ViewPager
         android:id="@+id/readviewpager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="500dp"
+        app:layout_constraintBottom_toTopOf="@+id/read_fav"
+        app:layout_constraintTop_toBottomOf="@+id/readbackbtn"
+        app:layout_constraintVertical_bias="0.468"
         tools:layout_editor_absoluteX="0dp" />
 
 </android.support.constraint.ConstraintLayout>

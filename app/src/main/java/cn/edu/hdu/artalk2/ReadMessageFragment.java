@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +15,26 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.io.FileInputStream;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import cn.edu.hdu.artalk2.utils.OkHttpManager;
+import cn.edu.hdu.artalk2.utils.ToastUtils;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 
 public class ReadMessageFragment extends Fragment {
 
     private boolean isStop;              //线程标志位
+    private static final String url = "http://47.112.174.246:3389/";
 
     //控件
     private MediaPlayer mediaPlayer;     //声音
@@ -44,15 +56,79 @@ public class ReadMessageFragment extends Fragment {
     private String mscurl;         //音频文件url
     private String strcontent;     //留言内容
     private String datetime;       //时间
+    private String msgid;          //留言id
 
+    //处理音频播放位置与后台点赞点踩数据
     private Handler handler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            // 将SeekBar位置设置到当前播放位置
-            seekBar.setProgress(msg.what);
-            //获得音乐的当前播放时间
-            curtime.setText(formatime(msg.what));
+            switch (msg.what){
+                case 1:          //处理音频位置
+                    int cur = (int)msg.obj;
+                    // 将SeekBar位置设置到当前播放位置
+                    seekBar.setProgress(cur);
+                    //获得音乐的当前播放时间
+                    curtime.setText(formatime(cur));
+                    break;
+                case 2:          //处理点赞接口数据
+                    String zanData = (String) msg.obj;
+                    try {
+                        JSONObject jsonObject = new JSONObject(zanData);
+
+                        String rs = jsonObject.getString("code");
+                        Log.d("rs",rs);
+                        if(Integer.parseInt(rs)>0){
+                            if(rs.equals("1")){  //点赞
+                                strzannum += 1;
+                                zannum.setText(String.valueOf(strzannum));
+                            }
+                            else if(rs.equals("3")){  //取消赞
+                                strzannum -= 1;
+                                zannum.setText(String.valueOf(strzannum));
+                            }
+                        }
+                        else {
+                            if(rs.equals("-1")){
+                                ToastUtils.show(getContext(),"请不要同时点赞和点踩哦");
+                            }
+                            else {
+                                ToastUtils.show(getContext(),"请求错误");
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 3:
+                    String caiData = (String) msg.obj;
+                    try {
+                        JSONObject jsonObject = new JSONObject(caiData);
+                        String rs = jsonObject.getString("code");
+                        Log.d("rs",rs);
+                        if(Integer.parseInt(rs)>0){
+                            if(rs.equals("2")){  //点踩
+                                strcainum += 1;
+                                zancopynum.setText(String.valueOf(strcainum));
+                            }
+                            else if(rs.equals("3")){  //取消踩
+                                strcainum -= 1;
+                                zancopynum.setText(String.valueOf(strcainum));
+                            }
+                        }
+                        else {
+                            if(rs.equals("-1")){
+                                ToastUtils.show(getContext(),"请不要同时点赞和点踩哦");
+                            }
+                            else {
+                                ToastUtils.show(getContext(),"请求错误");
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
         }
     };
 
@@ -61,8 +137,8 @@ public class ReadMessageFragment extends Fragment {
     }
 
 
-    public static ReadMessageFragment newInstance(Integer strzannum, Integer cainum,
-                                                  String mscurl,String strcontent,String datetime) {
+    public static ReadMessageFragment newInstance(Integer strzannum, Integer cainum, String mscurl,
+                                                  String strcontent,String datetime,String msgid) {
         ReadMessageFragment fragment = new ReadMessageFragment();
         Bundle args = new Bundle();
         args.putInt("strzannum", strzannum);
@@ -70,6 +146,7 @@ public class ReadMessageFragment extends Fragment {
         args.putString("mscurl",mscurl);
         args.putString("strcontent",strcontent);
         args.putString("datetime",datetime);
+        args.putString("msgid",msgid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -83,6 +160,7 @@ public class ReadMessageFragment extends Fragment {
             mscurl = getArguments().getString("mscurl");
             strcontent = getArguments().getString("strcontent");
             datetime = getArguments().getString("datetime");
+            msgid = getArguments().getString("msgid");
         }
     }
 
@@ -109,6 +187,7 @@ public class ReadMessageFragment extends Fragment {
         time.setText(datetime);
 
         mediaPlayer = new MediaPlayer();
+
         //调用子线程
         play();
 
@@ -152,6 +231,72 @@ public class ReadMessageFragment extends Fragment {
                 }
             }
         });
+
+        //点赞按钮
+        zan_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                OkHttpManager okHttpManager = OkHttpManager.getInstance();
+                Map<String,String> map = new HashMap<>();
+                //传入留言id和用户id
+                map.put("msId",msgid);
+                map.put("userId","1");
+
+                Callback callback = new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.e("onFailure: ","请求失败");
+                        Log.e("onFailure",e.toString());
+                        Log.e("onFailure",call.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.d("success","请求成功");
+                        Message msg = new Message();
+                        msg.obj = response.body().string();
+                        msg.what = 2;
+                        //往主线程传输数据
+                        handler.sendMessage(msg);
+                    }
+                };
+                okHttpManager.sendComplexFrom(url+"toggleMsLike/",map,callback);
+            }
+        });
+
+        //点踩按钮
+        zancopy_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OkHttpManager okHttpManager = OkHttpManager.getInstance();
+                Map<String,String> map = new HashMap<>();
+                //传入留言id和用户id
+                map.put("msId",msgid);
+                map.put("userId","1");
+
+                Callback callback = new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.e("onFailure: ","请求失败");
+                        Log.e("onFailure",e.toString());
+                        Log.e("onFailure",call.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.d("success","请求成功");
+                        Message msg = new Message();
+                        msg.obj = response.body().string();
+                        msg.what = 3;
+                        //往主线程传输数据
+                        handler.sendMessage(msg);
+                    }
+                };
+                okHttpManager.sendComplexFrom(url+"toggleMsDisLike/",map,callback);
+
+            }
+        });
         // Inflate the layout for this fragment
         return view;
     }
@@ -162,6 +307,8 @@ public class ReadMessageFragment extends Fragment {
         super.onDestroy();
         mediaPlayer.reset();
     }
+
+
 
 
     class MuiscThread implements Runnable {
@@ -177,7 +324,10 @@ public class ReadMessageFragment extends Fragment {
                     e.printStackTrace();
                 }
                 //发出的信息
-                handler.sendEmptyMessage(mediaPlayer.getCurrentPosition());
+                Message msg = new Message();
+                msg.what = 1;
+                msg.obj = mediaPlayer.getCurrentPosition();
+                handler.sendMessage(msg);
             }
         }
     }

@@ -17,7 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.441"/>
 
-    <!--赞-->
     <ImageView
         android:id="@+id/readcmzan"
         android:layout_width="25dp"
@@ -44,43 +43,46 @@
         app:layout_constraintVertical_bias="0.584" />
 
     <!--评论时间-->
+
+    <!--评论用户名-->
+
+    <!--评论区主标题-->
+
     <TextView
         android:id="@+id/readcmtime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
+        android:layout_marginStart="52dp"
         android:layout_marginTop="120dp"
         android:text="时间：yyyy:mm:dd"
         app:layout_constraintStart_toStartOf="@+id/readcmback"
         app:layout_constraintTop_toTopOf="@+id/readcmback" />
 
-    <!--评论用户名-->
     <TextView
         android:id="@+id/readcmuser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="70dp"
-        android:layout_marginTop="150dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="152dp"
         android:text="XXX:"
-        android:textStyle="bold"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@+id/readcmback"
-        app:layout_constraintTop_toTopOf="@+id/readcmback" />
-
-    <!--评论区主标题-->
-    <TextView
-        android:id="@+id/readcomtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="80dp"
         android:textSize="20dp"
         android:textStyle="bold"
-        android:text="评论区:"
         app:layout_constraintStart_toStartOf="@+id/readcmback"
         app:layout_constraintTop_toTopOf="@+id/readcmback" />
 
     <!--点赞数量-->
+    <TextView
+        android:id="@+id/readcomtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="80dp"
+        android:text="评论区:"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/readcmback"
+        app:layout_constraintTop_toTopOf="@+id/readcmback" />
+
     <TextView
         android:id="@+id/readcmzannum"
         android:layout_width="wrap_content"
@@ -106,15 +108,14 @@
 
     <TextView
         android:id="@+id/readcmcontent"
-        android:layout_width="260dp"
+        android:layout_width="250dp"
         android:layout_height="50dp"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="52dp"
         android:layout_marginTop="200dp"
         android:text="---"
-        android:autoSizeTextType="uniform"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="@+id/readcmback"
         app:layout_constraintTop_toTopOf="@+id/readcmback" />
-
 
 
 </android.support.constraint.ConstraintLayout>
