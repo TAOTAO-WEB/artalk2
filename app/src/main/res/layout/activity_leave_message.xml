@@ -13,6 +13,7 @@
         android:gravity="center"
         >
         <ImageView
+            android:id="@+id/btn_return"
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_alignParentTop="true"
@@ -90,8 +91,25 @@
                 android:text="长按进行录音"
                 android:gravity="center"
                 android:layout_below="@id/lm_mic"/>
+            <SeekBar
+                android:id="@+id/play"
+                android:layout_width="match_parent"
+                android:layout_height="18dp"
+                android:layout_marginTop="10dp"
+                android:layout_below="@id/lm_tv3"
+                android:layout_toRightOf="@id/tv_cur_time"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/tv_cur_time"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/lm_tv3"
+                android:layout_marginTop="10dp"
+                android:text="00:00"
+                android:visibility="gone"/>
         </RelativeLayout>
         <TextView
+            android:id="@+id/bt_submit"
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"

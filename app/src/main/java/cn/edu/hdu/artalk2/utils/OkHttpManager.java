@@ -7,6 +7,7 @@ import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
@@ -93,6 +94,13 @@ public class OkHttpManager {
         mClient.newCall(request).enqueue(callBack);
 
     }
-
+    //使用Post方式向服务器上提交数据并获取返回提示数据
+    public static void sendOkHttpResponse(final String address, final RequestBody requestBody, final okhttp3.Callback callback) {
+        OkHttpClient client = new OkHttpClient();
+//        JSONObject object;
+        Request request = new Request.Builder()
+                .url(address).post(requestBody).build();
+        client.newCall(request).enqueue(callback);
+    }
 
 }
