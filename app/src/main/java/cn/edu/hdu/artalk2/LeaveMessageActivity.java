@@ -52,7 +52,7 @@ public class LeaveMessageActivity extends AppCompatActivity {
 
     private static final String TAG = "message";
     private TextView lm_date, lm_time, bt_submit;
-    private ImageView lm_start;
+    private ImageView lm_start,bt_return;
     private ImageButton lm_mic;
     private EditText lm_et;
 
@@ -88,6 +88,7 @@ public class LeaveMessageActivity extends AppCompatActivity {
         bt_submit = findViewById(R.id.bt_submit);
         seekBar=findViewById(R.id.play);
         tv_CTIME=findViewById(R.id.tv_cur_time);
+        bt_return=findViewById(R.id.btn_return);
 
 
         //显示时间
@@ -259,6 +260,8 @@ public class LeaveMessageActivity extends AppCompatActivity {
                                 public void onFailure(Call call, IOException e) {
                                     Log.i(TAG, "onFailure: 失败");
                                   //  Toast.makeText(getApplicationContext(), "失败", Toast.LENGTH_SHORT).show();
+                                    Log.e("onFailure",e.toString());
+                                    Log.e("onFailure",call.toString());
                                     e.printStackTrace();
                                 }
 
@@ -300,6 +303,14 @@ public class LeaveMessageActivity extends AppCompatActivity {
 
 
                 }
+            }
+        });
+        //返回
+        bt_return.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(LeaveMessageActivity.this,ArScanActivity.class);
+                startActivity(intent);
             }
         });
 
