@@ -1,15 +1,17 @@
 package cn.edu.hdu.artalk2.utils;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Map;
 
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
 
 
 /**
@@ -21,6 +23,8 @@ public class OkHttpManager {
     private OkHttpClient mClient;
 //    private static Handler mHandler;
     private volatile static OkHttpManager sManager;
+    // 静态
+    private static OkHttpClient staticClient = new OkHttpClient();
 
     //使用构造方法完成初始化     私有化操作
     private OkHttpManager() {
@@ -50,6 +54,21 @@ public class OkHttpManager {
 
         mClient.newCall(request).enqueue(callback);
 
+
+    }
+
+    /**
+     * 异步post请求
+     * enqueue 实现post异步操作
+     */
+    public void asyncPostRequest(String url, JSONObject body, Callback callback) {
+
+        Request request = new Request.Builder().url(url).post(RequestBody.create(
+                        MediaType.parse("application/json;charset=UTF-8"),body.toString()))
+
+                .build();
+
+        mClient.newCall(request).enqueue(callback);
 
     }
 
@@ -94,6 +113,28 @@ public class OkHttpManager {
         mClient.newCall(request).enqueue(callBack);
 
     }
+
+    /**
+     * 静态方法，异步提交表单
+     * @param url 地址
+     * @param params 参数
+     * @param callBack 回调函数
+     */
+    public static void sendForm(String url, Map<String,String> params, Callback callBack) {
+        FormBody.Builder form_builder = new FormBody.Builder();
+        //对键值进行非空判断
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                form_builder.add(entry.getKey(),entry.getValue());
+            }
+        }
+        FormBody formBody = form_builder.build();
+        Request request = new Request.Builder().url(url).post(formBody).build();
+        staticClient.newCall(request).enqueue(callBack);
+
+    }
+
+
     //使用Post方式向服务器上提交数据并获取返回提示数据
     public static void sendOkHttpResponse(final String address, final RequestBody requestBody, final okhttp3.Callback callback) {
         OkHttpClient client = new OkHttpClient();
@@ -102,5 +143,4 @@ public class OkHttpManager {
                 .url(address).post(requestBody).build();
         client.newCall(request).enqueue(callback);
     }
-
 }

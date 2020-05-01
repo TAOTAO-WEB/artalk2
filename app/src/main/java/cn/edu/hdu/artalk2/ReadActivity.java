@@ -2,22 +2,16 @@ package cn.edu.hdu.artalk2;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,8 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.hdu.artalk2.utils.OkHttpManager;
 import cn.edu.hdu.artalk2.adapter.ReadAdapter;
+import cn.edu.hdu.artalk2.utils.OkHttpManager;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
