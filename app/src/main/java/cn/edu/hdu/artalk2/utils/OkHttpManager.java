@@ -135,4 +135,12 @@ public class OkHttpManager {
     }
 
 
+    //使用Post方式向服务器上提交数据并获取返回提示数据
+    public static void sendOkHttpResponse(final String address, final RequestBody requestBody, final okhttp3.Callback callback) {
+        OkHttpClient client = new OkHttpClient();
+//        JSONObject object;
+        Request request = new Request.Builder()
+                .url(address).post(requestBody).build();
+        client.newCall(request).enqueue(callback);
+    }
 }
