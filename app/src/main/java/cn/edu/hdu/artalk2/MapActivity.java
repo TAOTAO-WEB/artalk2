@@ -103,20 +103,14 @@ import static com.baidu.location.h.l.v;
 //主界面
 public class MapActivity extends AppCompatActivity {
 
-    /**
-     * 地图相关
-     */
+    /**地图相关*/
     private MapView mMapView = null;
     private BaiduMap mBaiduMap = null;
     private Context context;
-    /**
-     * 两个按钮
-     */
+    /**两个按钮*/
     private ImageButton message_button = null;
     private ImageButton scan_button = null;
-    /**
-     * 定位相关
-     */
+    /**定位相关*/
     private double mLatitude;
     private double mLongtitude;
     private LocationClient mLocationClient;
@@ -125,26 +119,20 @@ public class MapActivity extends AppCompatActivity {
     private boolean isFirstin = true;
     double Lat = 0;
     double Lon = 0;
-    /**
-     * 方向传感器
-     */
+    /**方向传感器*/
     private MyOrientationListener mMyOrientationListener;
     private float mCurrentX;
     //自定义图标
     private BitmapDescriptor mIconLocation;
-    /**
-     * 导航栏相关
-     */
+    /**导航栏相关*/
     private BottomNavigationView bottomNavigationView;
     private ViewPager viewPagerAdapter;
     private ViewPager viewPager;
     private MenuItem menuItem;
-    /**
-     * okhttp相关
-     */
+    /**okhttp相关*/
     String location, id;
     public static final String url = "http://47.112.174.246:3389/getMessage";
-    public static final String TAG = "MapActivity";
+    public static final String TAG="MapActivity";
 
 
     @Override
@@ -262,9 +250,7 @@ public class MapActivity extends AppCompatActivity {
         }
     };
 
-    /**
-     * marker相关
-     */
+    /**marker相关*/
 
     //添加单个marker
     private void setMarker() {
