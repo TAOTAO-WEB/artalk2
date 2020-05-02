@@ -139,8 +139,8 @@ public class ArScanActivity extends AppCompatActivity {
       Toast.makeText(ArScanActivity.this,toast,Toast.LENGTH_SHORT).show();
 
       Map<String,String> map = new HashMap<>();
-      map.put("Cx",String.valueOf(Math.round(latitude)));
-      map.put("Cy",String.valueOf(Math.round(longitude)));
+      map.put("cx",String.valueOf(Math.round(latitude)));
+      map.put("cy",String.valueOf(Math.round(longitude)));
 //    map.put("mId","10");
 
       // 发送获取消息列表请求
@@ -155,7 +155,6 @@ public class ArScanActivity extends AppCompatActivity {
           String res = response.body().string();
 
           Log.d("response",res);
-          Log.d("body", response.body().string());
 
           ObjectMapper mapper = new ObjectMapper();
 
