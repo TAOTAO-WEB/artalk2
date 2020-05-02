@@ -1,22 +1,31 @@
 package cn.edu.hdu.artalk2.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Message {
 
     private String msId;
-    private int type;
-    private int userId;
+    private String userId;
     private int likeCount;
+    private int DislikeCount;
     private int commentCount;
-
-    public Message(String msId, int type, int userId, int likeCount, int commentCount) {
-        this.msId = msId;
-        this.type = type;
-        this.userId = userId;
-        this.likeCount = likeCount;
-        this.commentCount = commentCount;
-    }
+    private int mstype;
+    private String time;
+    private String avatar;
 
     public Message() {
+    }
+
+    public Message(String msId, String userId, int likeCount, int dislikeCount, int commentCount, int mstype, String time, String avatar) {
+        this.msId = msId;
+        this.userId = userId;
+        this.likeCount = likeCount;
+        this.DislikeCount = dislikeCount;
+        this.commentCount = commentCount;
+        this.mstype = mstype;
+        this.time = time;
+        this.avatar = avatar;
     }
 
     public String getMsId() {
@@ -27,19 +36,11 @@ public class Message {
         this.msId = msId;
     }
 
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public int getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -51,11 +52,43 @@ public class Message {
         this.likeCount = likeCount;
     }
 
+    public int getDislikeCount() {
+        return DislikeCount;
+    }
+
+    public void setDislikeCount(int dislikeCount) {
+        this.DislikeCount = dislikeCount;
+    }
+
     public int getCommentCount() {
         return commentCount;
     }
 
     public void setCommentCount(int commentCount) {
         this.commentCount = commentCount;
+    }
+
+    public int getMstype() {
+        return mstype;
+    }
+
+    public void setMstype(int mstype) {
+        this.mstype = mstype;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }
