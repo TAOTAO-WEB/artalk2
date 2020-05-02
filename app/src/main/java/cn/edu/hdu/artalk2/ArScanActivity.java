@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -100,6 +101,8 @@ public class ArScanActivity extends AppCompatActivity {
   private GetMessageListService mService;
   private boolean mBound = false;
 
+  private Handler mhandler = new Handler();
+
 
   // 请求网址
   private static final String POST_COORDINATE_URL = "http://47.112.174.246:3389/getMessage/";
@@ -162,8 +165,6 @@ public class ArScanActivity extends AppCompatActivity {
 
           messages.setMessageList(messageList);
 
-          Log.d("messageList",messageList.toString());
-
         }
       });
 
@@ -204,9 +205,18 @@ public class ArScanActivity extends AppCompatActivity {
       @Override
       public void onUpdate(List<Message> list) {
         if (list.size()!=0 && !isDisplayingAudioCard){
+
           isDisplayingAudioCard = true;
+
           Log.d(TAG,"监听到有语音留言数据...");
-          displayAr();
+
+          // 更新ui线程
+          mhandler.post(new Runnable() {
+              @Override
+              public void run() {
+                  displayAr();
+              }
+          });
         }
         // 没有语音数据
         if (list.size() == 0){
@@ -488,7 +498,7 @@ public class ArScanActivity extends AppCompatActivity {
         Message m = messages.getMessageList().get(0);
 
         Intent intent = new Intent(ArScanActivity.this,ReadActivity.class);
-        intent.putExtra("msgId",m.getMsId());
+        intent.putExtra("msgid",m.getMsId());
         startActivity(intent);
       }
     });
