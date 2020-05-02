@@ -1,6 +1,7 @@
 package cn.edu.hdu.artalk2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -210,7 +211,7 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 Toast.makeText(MapActivity.this, "点击了MARKER", Toast.LENGTH_SHORT);
-                return false;
+                return true;
             }
         });
     }
@@ -245,7 +246,10 @@ public class MapActivity extends AppCompatActivity {
             public boolean onMarkerClick(Marker marker) {
                 //PostMarkerLocation();
                 Toast.makeText(MapActivity.this, "点击了MARKER", Toast.LENGTH_SHORT);
-                return false;
+//                Intent intent = new Intent(MapActivity.this,ArScanActivity.class);
+////intent.putExtra(Name,Value); 传递数据到第二个Activity
+//                startActivity(intent);
+                return true;
             }
         });
     }
@@ -317,6 +321,9 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MapActivity.this, "点击跳转到扫描界面", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MapActivity.this,ArScanActivity.class);
+//intent.putExtra(Name,Value); 传递数据到第二个Activity
+                startActivity(intent);
             }
         });
     }
